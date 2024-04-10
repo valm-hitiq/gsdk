@@ -323,9 +323,13 @@ Examples:
 - `image_update 0 ./image/banana.png --label="Line 1\nLine 2"`
 
   Send an image to index 0 on the single connected ESL with two lines of label. Note that address is a positional argument yet it can be omitted if there's only one connected device present at the moment.
-- `image_update 1 "/user/home/path with space/img.jpg"` all
+- `image_update 1 "/user/home/path with space/img.jpg" all`
 
   Use the 'all' keyword as special address to send the same image to slot 1 on all connected ESLs.
+
+- `image_update 0 *qrcode all`
+
+  To send unique QR codes to all connected tags for use with ESL Demo, enter "*qrcode" instead of a valid image file path. Typically beneficial for ESLs equipped with permanent displays, such as ePaper.
 
 #### led
     Turn on / off or flash an LED utilizing the LED control command.

@@ -39,6 +39,10 @@
 #define FLAG_IPC_RESPONSE_PENDING                       0x08
 
 #define CMSIS_RTOS_ERROR_MASK                           0x80000000
+// The Application Framework Task yield timeout in milliseconds.
+// This is the most the application task shall yield. Upon timeout,
+// the task will check again if yielding is possible.
+#define CMSIS_RTOS_APP_FRAMEWORK_YIELD_TIMEOUT_MS       (250)
 
 //------------------------------------------------------------------------------
 // Public APIs

@@ -615,7 +615,7 @@ bool inAppMode(AppMode_t appMode, char *command);
 bool inRadioState(RAIL_RadioState_t state, char *command);
 bool parseTimeModeFromString(char *str, RAIL_TimeMode_t *mode);
 const char *configuredRxAntenna(RAIL_RxOptions_t rxOptions);
-RAIL_Status_t configureTxFifo(void);
+uint16_t configureTxFifo(uint16_t fifoBytes);
 
 void updateStats(int32_t newValue, Stats_t *stats);
 void rfSensedCheck(void);

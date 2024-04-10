@@ -3,7 +3,7 @@
  * @brief Voice transmission
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -27,10 +27,11 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-// Define module name for Power Manager debuging feature.
+// Define module name for Power Manager debugging feature.
 #define CURRENT_MODULE_NAME    "APP_BLUETOOTH_EXAMPLE_SOC_VOICE"
 
 #include <string.h>
+#include "sl_common.h"
 #include "sl_power_manager.h"
 #include "sl_board_control.h"
 #include "app_assert.h"

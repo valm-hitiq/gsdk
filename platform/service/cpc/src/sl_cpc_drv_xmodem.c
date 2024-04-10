@@ -401,8 +401,13 @@ bool sli_cpc_is_bootloader_running(void)
   if (bootloader_has_been_probed) {
     return is_bootloader_running;
   }
+  bootloader_has_been_probed = true;
 
-  memset(frame.data, 0x00, sizeof(frame.data));
+  memset(frame.data, 0x00, XMODEM_DATA_SIZE);
+
+  for (size_t i = 0; i != 16; i++) {
+    (void) SL_CPC_DRV_UART_PERIPHERAL->RXDATA;
+  }
 
   // Since this is a unique descriptor being used to start a transfer, its okay for it to be declared on the
   // stack and not being a global variable. This is because the DMADRV_LdmaStartTransfer function takes the
@@ -410,8 +415,8 @@ bool sli_cpc_is_bootloader_running(void)
   // so this descriptor can disappear after this function return and there will be no problem.
   LDMA_Descriptor_t fwu_receive_prompt_descriptor = (LDMA_Descriptor_t) LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(
     &(SL_CPC_DRV_UART_PERIPHERAL->RXDATA),
-    frame.data,
-    sizeof(frame.data) - 1); // Leave space for a trailing \0
+    &frame.data[0],
+    XMODEM_DATA_SIZE - 1); // Leave space for a trailing \0
 
   fwu_receive_prompt_descriptor.xfer.doneIfs = 0; // No interrupt
 
@@ -441,7 +446,7 @@ bool sli_cpc_is_bootloader_running(void)
 
   sl_udelay_wait(GECKO_STRING_USEC + BOOTLOADER_SAFE_MARGIN_USEC);
 
-  if (!strstr((char*)frame.data, gecko_string)) {
+  if (!strstr((char*)frame.data, &gecko_string[2])) {
     DMADRV_StopTransfer(read_channel);
     is_bootloader_running = false;
     goto end_of_function;
@@ -471,7 +476,6 @@ bool sli_cpc_is_bootloader_running(void)
   is_bootloader_running = true;
 
   end_of_function:
-  bootloader_has_been_probed = true;
   return is_bootloader_running;
 }
 

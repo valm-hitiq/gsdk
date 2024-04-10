@@ -117,7 +117,7 @@ __attribute__((stdcall)) static void app_timer_common_callback(HWND hwnd,
     tmp_timer_ptr = tmp_timer_ptr->next;
   }
   if (NULL == tmp_timer_ptr) {
-    app_log_error("Timer handle %d not found." APP_LOG_NL, timer_id);
+    app_log_error("Timer handle %p not found." APP_LOG_NL, (void*)timer_id);
     (void)KillTimer(NULL, timer_id);
     (void)GetLastError();
   } else {

@@ -83,7 +83,9 @@ static bool enable_security = false;
 #endif // defined(SECURITY) && SECURITY == 1
 
 static int32_t ncp_host_peek_timeout(uint32_t len, uint32_t timeout);
-void ncp_sec_host_command_handler(buf_ncp_host_t *buf);
+static void ncp_sec_host_command_handler(buf_ncp_host_t *buf);
+static int32_t ncp_host_lazy_peek(void);
+static int32_t ncp_host_get_msg(void);
 
 /**************************************************************************//**
  * Initialize NCP connection.
@@ -92,7 +94,7 @@ sl_status_t ncp_host_init(void)
 {
   sl_status_t sc;
 
-  sc = sl_bt_api_initialize_nonblock(ncp_host_tx, ncp_host_rx, ncp_host_peek);
+  sc = sl_bt_api_initialize_nonblock(ncp_host_tx, ncp_host_rx, ncp_host_lazy_peek);
 
   if (sc == SL_STATUS_OK) {
     sc = host_comm_init();
@@ -163,30 +165,50 @@ void ncp_host_tx(uint32_t len, uint8_t* data)
 int32_t ncp_host_rx(uint32_t len, uint8_t* data)
 {
   int32_t ret;
+  static uint16_t read_offset = 0;
 
   if (buf_ncp_in.len == 0) {
-    ret = ncp_host_peek();
+    ret = ncp_host_get_msg();
+    // Finished receiving a brand new, complete NCP message
+    read_offset = 0;
   } else {
-    ret = buf_ncp_in.len;
+    // NCP host code is still processing the previosuly received message
+    ret = buf_ncp_in.len - read_offset;
   }
   if (ret > 0) {
-    if (len <= buf_ncp_in.len) {
-      memcpy(data, buf_ncp_in.buf, len);
-      buf_ncp_in.len -= len;
-      memmove(buf_ncp_in.buf, &buf_ncp_in.buf[len], buf_ncp_in.len);
+    if (len <= ret) {
+      memcpy(data, &buf_ncp_in.buf[read_offset], len);
+      read_offset += len;
     } else {
       ret = -1;
+      // Drop seemingly partial messages
+      buf_ncp_in.len = 0;
     }
   } else {
+    // Reset the length counter until a full message arrives
+    buf_ncp_in.len = 0;
     ret = -1;
   }
   return ret;
 }
 
-/**************************************************************************//**
- * Peek if readable data exists with timeout option.
+/******************************************************************************
+ * Check if any data is available in receive buffer, sleep if empty
  *****************************************************************************/
-int32_t ncp_host_peek_timeout(uint32_t len, uint32_t timeout)
+static int32_t ncp_host_lazy_peek(void)
+{
+  int32_t ret = HOST_COMM_PEEK();
+
+  if (ret < 1) {
+    app_sleep_us(PEEK_US_SLEEP);
+  }
+  return ret;
+}
+
+/******************************************************************************
+ * Check if given amount of data is available in receive buffer within timeout
+ *****************************************************************************/
+static int32_t ncp_host_peek_timeout(uint32_t len, uint32_t timeout)
 {
   int32_t ret;
   uint32_t timeout_counter = 0;
@@ -203,23 +225,20 @@ int32_t ncp_host_peek_timeout(uint32_t len, uint32_t timeout)
   return ret;
 }
 
-/**************************************************************************//**
- * Peek if readable data exists.
+/******************************************************************************
+ * Assemble complete BGAPI message from the receive buffer
  *****************************************************************************/
-int32_t ncp_host_peek(void)
+static int32_t ncp_host_get_msg(void)
 {
   int32_t msg_len;
 
-  msg_len = HOST_COMM_PEEK();
-  if (msg_len) {
+  msg_len = ncp_host_lazy_peek();
+  if (msg_len > 0) {
     int32_t ret;
     uint8_t msg_header = 0;
 
     // Read first byte
     ret = HOST_COMM_RX(1, &buf_ncp_raw.buf[0]);
-    if (ret < 0) {
-      return -1;
-    }
     msg_header = (uint8_t)(buf_ncp_raw.buf[0] & 0xf8);
     msg_len = 256 * (buf_ncp_raw.buf[0] & 0x07); // Get the high bits of the message length
     // Check if proper ncp header arrived
@@ -230,9 +249,6 @@ int32_t ncp_host_peek(void)
         return -1;
       }
       ret = HOST_COMM_RX(1, (void *)&buf_ncp_raw.buf[1]);
-      if (ret < 0) {
-        return -1;
-      }
       msg_len |= buf_ncp_raw.buf[1];
       msg_len += 2;
       // Check if length will fit to buffer
@@ -264,15 +280,15 @@ int32_t ncp_host_peek(void)
         ncp_sec_host_command_handler(&buf_ncp_in);
       }
 #endif // defined(SECURITY) && SECURITY == 1
+    } else {
+      return -1;
     }
-  } else {
-    app_sleep_us(PEEK_US_SLEEP);
   }
   return msg_len;
 }
 
 #if defined(SECURITY) && SECURITY == 1
-void ncp_sec_host_command_handler(buf_ncp_host_t *buf)
+static void ncp_sec_host_command_handler(buf_ncp_host_t *buf)
 {
   uint8_t response[DEFAULT_HOST_BUFLEN];
   sl_bt_msg_t *command = NULL;

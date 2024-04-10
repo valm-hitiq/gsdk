@@ -80,6 +80,8 @@
 #define HIGH_PRIORITY           0      ///< High Priority
 /// Values greater than max 37200000 are treated as unknown remaining time
 #define UNKNOWN_REMAINING_TIME  40000000
+/// Difference between Generic Level and Hue/Saturation Level to convert the ranges
+#define GENERIC_TO_HSL_LEVEL_SHIFT    32768
 
 /// Lightbulb state
 static PACKSTRUCT(struct lightbulb_state {
@@ -1486,6 +1488,9 @@ static void hue_level_move_schedule_next_request(int32_t remaining_delta)
  ******************************************************************************/
 static void hue_level_move_request(void)
 {
+  // sync current hue level with actual value
+  lightbulb_state.hue_level_current = lightbulb_state.hue_current - GENERIC_TO_HSL_LEVEL_SHIFT;
+
   log_info("Hue generic level move: level %d -> %d, delta %d in %lu ms" NL,
            lightbulb_state.hue_level_current,
            lightbulb_state.hue_level_target,
@@ -1498,16 +1503,11 @@ static void hue_level_move_request(void)
   if (abs(remaining_delta) < abs(move_hue_level_delta)) {
     // end of move level as it reached target state
     lightbulb_state.hue_level_current = lightbulb_state.hue_level_target;
-    lightbulb_state.hue_current = lightbulb_state.hue_target;
   } else {
     lightbulb_state.hue_level_current += move_hue_level_delta;
-    lightbulb_state.hue_current += move_hue_level_delta;
   }
   lightbulb_state_changed();
   hue_level_update_and_publish(BTMESH_HSL_SERVER_HUE, UNKNOWN_REMAINING_TIME);
-
-  remaining_delta = (int32_t)lightbulb_state.hue_level_target
-                    - lightbulb_state.hue_level_current;
 
   hue_level_move_schedule_next_request(remaining_delta);
 }
@@ -2340,6 +2340,9 @@ static void saturation_level_move_schedule_next_request(int32_t remaining_delta)
  ******************************************************************************/
 static void saturation_level_move_request(void)
 {
+  // sync current saturation level with actual value
+  lightbulb_state.saturation_level_current = lightbulb_state.saturation_current - GENERIC_TO_HSL_LEVEL_SHIFT;
+
   log_info("Saturation generic level move: level %d -> %d, delta %d in %lu ms" NL,
            lightbulb_state.saturation_level_current,
            lightbulb_state.saturation_level_target,
@@ -2352,17 +2355,12 @@ static void saturation_level_move_request(void)
   if (abs(remaining_delta) < abs(move_saturation_level_delta)) {
     // end of move level as it reached target state
     lightbulb_state.saturation_level_current = lightbulb_state.saturation_level_target;
-    lightbulb_state.saturation_current = lightbulb_state.saturation_target;
   } else {
     lightbulb_state.saturation_level_current += move_saturation_level_delta;
-    lightbulb_state.saturation_current += move_saturation_level_delta;
   }
   lightbulb_state_changed();
   saturation_level_update_and_publish(BTMESH_HSL_SERVER_SATURATION,
                                       UNKNOWN_REMAINING_TIME);
-
-  remaining_delta = (int32_t)lightbulb_state.saturation_level_target
-                    - lightbulb_state.saturation_level_current;
 
   saturation_level_move_schedule_next_request(remaining_delta);
 }

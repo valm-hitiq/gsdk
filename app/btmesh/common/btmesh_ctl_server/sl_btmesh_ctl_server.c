@@ -79,6 +79,8 @@
 #define HIGH_PRIORITY         0      ///< High Priority
 /// Values greater than max 37200000 are treated as unknown remaining time
 #define UNKNOWN_REMAINING_TIME      40000000
+/// Difference between Generic Level and temperature value to convert the ranges
+#define GENERIC_TO_TEMP_LEVEL_SHIFT    32768
 
 /// Lightbulb state
 static PACKSTRUCT(struct lightbulb_state {
@@ -1496,6 +1498,9 @@ static void sec_level_move_schedule_next_request(int32_t remaining_delta)
  ******************************************************************************/
 static void sec_level_move_request(void)
 {
+  // sync current sec level and actual value
+  lightbulb_state.sec_level_current = lightbulb_state.temperature_current - GENERIC_TO_TEMP_LEVEL_SHIFT;
+
   log_info("Secondary level move: level %d -> %d, delta %d in %lu ms" NL,
            lightbulb_state.sec_level_current,
            lightbulb_state.sec_level_target,
@@ -1508,18 +1513,13 @@ static void sec_level_move_request(void)
   if (abs(remaining_delta) < abs(move_sec_level_delta)) {
     // end of move level as it reached target state
     lightbulb_state.sec_level_current = lightbulb_state.sec_level_target;
-    lightbulb_state.temperature_current = lightbulb_state.temperature_target;
   } else {
     lightbulb_state.sec_level_current += move_sec_level_delta;
-    uint16_t temperature = level_to_temperature(lightbulb_state.sec_level_current);
-    lightbulb_state.temperature_current = temperature;
   }
   lightbulb_state_changed();
   sec_level_update_and_publish(BTMESH_CTL_SERVER_TEMPERATURE,
                                UNKNOWN_REMAINING_TIME);
 
-  remaining_delta = (int32_t)lightbulb_state.sec_level_target
-                    - lightbulb_state.sec_level_current;
   if (remaining_delta != 0) {
     sec_level_move_schedule_next_request(remaining_delta);
   }

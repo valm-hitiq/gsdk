@@ -1862,6 +1862,9 @@ static void pri_level_move_schedule_next_request(int32_t remaining_delta)
  ******************************************************************************/
 static void pri_level_move_request(void)
 {
+  // sync current pri level and actual lightness
+  lightbulb_state.pri_level_current = lightbulb_state.lightness_current - GENERIC_TO_LIGHTNESS_LEVEL_SHIFT;
+
   log_info("Primary level move: level %d -> %d, delta %d in %lu ms" NL,
            lightbulb_state.pri_level_current,
            lightbulb_state.pri_level_target,
@@ -1874,17 +1877,13 @@ static void pri_level_move_request(void)
   if (abs(remaining_delta) < abs(move_pri_level_delta)) {
     // end of move level as it reached target state
     lightbulb_state.pri_level_current = lightbulb_state.pri_level_target;
-    lightbulb_state.lightness_current = lightbulb_state.lightness_target;
   } else {
     lightbulb_state.pri_level_current += move_pri_level_delta;
-    lightbulb_state.lightness_current += move_pri_level_delta;
   }
   lightbulb_state_changed();
   pri_level_update_and_publish(BTMESH_LIGHTING_SERVER_MAIN,
                                UNKNOWN_REMAINING_TIME);
 
-  remaining_delta = (int32_t)lightbulb_state.pri_level_target
-                    - lightbulb_state.pri_level_current;
   if (remaining_delta != 0) {
     pri_level_move_schedule_next_request(remaining_delta);
   }
@@ -1945,6 +1944,8 @@ static void pri_level_request(uint16_t model_id,
                request->level, transition_ms, delay_ms);
 
       pri_level_move_stop();
+
+      lightness_kind = mesh_generic_state_level;
 
       if (lightbulb_state.pri_level_current == request->level) {
         log_info("Request for current state received; no op" NL);

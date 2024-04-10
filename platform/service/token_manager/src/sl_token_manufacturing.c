@@ -166,6 +166,8 @@ EmberStatus halInternalFlashErase(uint8_t eraseType, uint32_t address)
     ret = MSC_MassErase();
 #endif // !defined (_SILICON_LABS_32B_SERIES_2)
   } else {
+    // EMHAL-2846: Ensure page boundary alignment
+    address &= ~(FLASH_PAGE_SIZE - 1);
     ret = MSC_ErasePage((uint32_t *) address);
   }
 

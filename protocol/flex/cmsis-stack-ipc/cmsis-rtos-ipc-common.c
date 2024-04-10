@@ -28,7 +28,7 @@
  ******************************************************************************/
 
 #include <stdlib.h>
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include <string.h>
 #include "cmsis-rtos-ipc-config.h"
 
@@ -77,15 +77,15 @@ void emAfPluginCmsisRtosIpcInit(void)
   };
 
   emAfPluginCmsisRtosFlags = osEventFlagsNew(&rtosFlagsAttr);
-  assert(emAfPluginCmsisRtosFlags != NULL);
+  CONNECT_STACK_ASSERT(emAfPluginCmsisRtosFlags != NULL);
 
   commandMutex = osMutexNew(NULL);
-  assert(commandMutex != NULL);
+  CONNECT_STACK_ASSERT(commandMutex != NULL);
 
   callbackQueue = osMessageQueueNew(EMBER_AF_PLUGIN_CMSIS_RTOS_MAX_CALLBACK_QUEUE_SIZE,
                                     (sizeof(EmberBufferDesc) + 3) & (~3) /* align to 4 bytes */,
                                     NULL);
-  assert(callbackQueue != NULL);
+  CONNECT_STACK_ASSERT(callbackQueue != NULL);
 }
 
 uint8_t *sendBlockingCommand(uint8_t *apiCommandBuffer)
@@ -93,7 +93,7 @@ uint8_t *sendBlockingCommand(uint8_t *apiCommandBuffer)
   (void)apiCommandBuffer;
   // This API can not be called from the stack task (the stack task calls
   // stack APIs directly).
-  assert(!isCurrentTaskStackTask());
+  CONNECT_STACK_ASSERT(!isCurrentTaskStackTask());
 
   // Post the "command pending" flag, wake up the stack and pend for the
   // "response" pending flag.
@@ -108,7 +108,7 @@ void sendResponse(uint8_t *apiCommandBuffer, uint16_t commandLength)
   (void)apiCommandBuffer;
   (void)commandLength;
   // This API must be called from the stack task.
-  assert(isCurrentTaskStackTask());
+  CONNECT_STACK_ASSERT(isCurrentTaskStackTask());
   postResponsePendingFlag();
 }
 
@@ -117,7 +117,7 @@ void emAfPluginCmsisRtosProcessIncomingApiCommand(void)
   uint32_t status = pendCommandPendingFlag();
 
   // This API must be called from the stack task.
-  assert(isCurrentTaskStackTask());
+  CONNECT_STACK_ASSERT(isCurrentTaskStackTask());
 
   /* Need to check that the pend did not result in an error
    * and that the expected flag is present.
@@ -133,7 +133,7 @@ void emAfPluginCmsisRtosProcessIncomingApiCommand(void)
 void sendCallbackCommand(uint8_t *callbackCommandBuffer, uint16_t commandLength)
 {
   // This API must be called from the stack task.
-  assert(isCurrentTaskStackTask());
+  CONNECT_STACK_ASSERT(isCurrentTaskStackTask());
 
   // Queue is full or no memory available: either way just return.
   if (callbackCommandBuffer == NULL) {
@@ -175,7 +175,7 @@ bool emAfPluginCmsisRtosProcessIncomingCallbackCommand(void)
 
   // This API can not be called from the stack task (the stack task calls
   // stack APIs directly).
-  assert(!isCurrentTaskStackTask());
+  CONNECT_STACK_ASSERT(!isCurrentTaskStackTask());
 
   osMessageQueueGet(callbackQueue,
                     (void *)&callbackBufferDescriptorGet,
@@ -210,16 +210,16 @@ bool isCurrentTaskStackTask(void)
 
 void acquireCommandMutex(void)
 {
-  assert(!isCurrentTaskStackTask());
+  CONNECT_STACK_ASSERT(!isCurrentTaskStackTask());
 
-  assert(osMutexAcquire(commandMutex, osWaitForever) == osOK);
+  CONNECT_STACK_ASSERT(osMutexAcquire(commandMutex, osWaitForever) == osOK);
 }
 
 void releaseCommandMutex(void)
 {
-  assert(!isCurrentTaskStackTask());
+  CONNECT_STACK_ASSERT(!isCurrentTaskStackTask());
 
-  assert(osMutexRelease(commandMutex) == osOK);
+  CONNECT_STACK_ASSERT(osMutexRelease(commandMutex) == osOK);
 }
 
 uint8_t *getApiCommandPointer()
@@ -280,26 +280,30 @@ static uint32_t pendCommandPendingFlag(void)
 
 static void postCommandPendingFlag(void)
 {
-  assert((osEventFlagsSet(emAfPluginCmsisRtosFlags,
-                          FLAG_IPC_COMMAND_PENDING) & CMSIS_RTOS_ERROR_MASK) == 0);
+  CONNECT_STACK_ASSERT((osEventFlagsSet(emAfPluginCmsisRtosFlags,
+                                        FLAG_IPC_COMMAND_PENDING)
+                        & CMSIS_RTOS_ERROR_MASK) == 0);
 }
 
 static void pendResponsePendingFlag(void)
 {
-  assert((osEventFlagsWait(emAfPluginCmsisRtosFlags,
-                           FLAG_IPC_RESPONSE_PENDING,
-                           osFlagsWaitAny,
-                           osWaitForever) & CMSIS_RTOS_ERROR_MASK) == 0);
+  CONNECT_STACK_ASSERT((osEventFlagsWait(emAfPluginCmsisRtosFlags,
+                                         FLAG_IPC_RESPONSE_PENDING,
+                                         osFlagsWaitAny,
+                                         osWaitForever)
+                        & CMSIS_RTOS_ERROR_MASK) == 0);
 }
 
 static void postResponsePendingFlag(void)
 {
-  assert((osEventFlagsSet(emAfPluginCmsisRtosFlags,
-                          FLAG_IPC_RESPONSE_PENDING) & CMSIS_RTOS_ERROR_MASK) == 0);
+  CONNECT_STACK_ASSERT((osEventFlagsSet(emAfPluginCmsisRtosFlags,
+                                        FLAG_IPC_RESPONSE_PENDING)
+                        & CMSIS_RTOS_ERROR_MASK) == 0);
 }
 
 static void postCallbackPendingFlag(void)
 {
-  assert((osEventFlagsSet(emAfPluginCmsisRtosFlags,
-                          FLAG_STACK_CALLBACK_PENDING) & CMSIS_RTOS_ERROR_MASK) == 0);
+  CONNECT_STACK_ASSERT((osEventFlagsSet(emAfPluginCmsisRtosFlags,
+                                        FLAG_STACK_CALLBACK_PENDING)
+                        & CMSIS_RTOS_ERROR_MASK) == 0);
 }

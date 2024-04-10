@@ -29,7 +29,7 @@
 // Define module name for Power Manager debuging feature.
 #define CURRENT_MODULE_NAME    "FLEX_RTOS_VNCP_TASK"
 
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include "cmsis-rtos-ipc-config.h"
 #include "sl_component_catalog.h"
 
@@ -78,8 +78,9 @@ void emAfPluginCmsisRtosStackTask(void *p_arg)
 // This can be called from ISR.
 void emAfPluginCmsisRtosWakeUpConnectStackTask(void)
 {
-  assert((osEventFlagsSet(emAfPluginCmsisRtosFlags,
-                          FLAG_STACK_ACTION_PENDING) & CMSIS_RTOS_ERROR_MASK) == 0);
+  CONNECT_STACK_ASSERT((osEventFlagsSet(emAfPluginCmsisRtosFlags,
+                                        FLAG_STACK_ACTION_PENDING)
+                        & CMSIS_RTOS_ERROR_MASK) == 0);
 }
 
 //------------------------------------------------------------------------------

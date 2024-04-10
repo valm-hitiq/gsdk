@@ -33,52 +33,54 @@ for k, v in pairs(spidrv.instances) do
                 nil)
         end
     else
-        freq = tonumber(slc.config("SL_DEVICE_INIT_HFXO_FREQ").value)
-        selected_clkdiv = freq / (2 * spi_bitrate)
-        if selected_clkdiv > max_clkdiv then
-            validation.warning(
-                "clkdiv is too high, need to be equal or smaller than 256",
-                validation.target_for_defines({str_spi_bitrate}),
-                "Set a higher bitrate or lower the reference clock hfxo",
-                nil)
-        elseif selected_clkdiv < min_clkdiv then
+        if slc.config("SL_DEVICE_INIT_HFXO_FREQ") ~= nil then
+            freq = tonumber(slc.config("SL_DEVICE_INIT_HFXO_FREQ").value)
+            selected_clkdiv = freq / (2 * spi_bitrate)
+            if selected_clkdiv > max_clkdiv then
                 validation.warning(
-                "clkdiv is too low, need to be equal or higher than 1",
-                validation.target_for_defines({str_spi_bitrate}),
-                "Set a lower bitrate or higher the reference clock hfxo",
-                nil)
+                    "clkdiv is too high, need to be equal or smaller than 256",
+                    validation.target_for_defines({str_spi_bitrate}),
+                    "Set a higher bitrate or lower the reference clock hfxo",
+                    nil)
+            elseif selected_clkdiv < min_clkdiv then
+                    validation.warning(
+                    "clkdiv is too low, need to be equal or higher than 1",
+                    validation.target_for_defines({str_spi_bitrate}),
+                    "Set a lower bitrate or higher the reference clock hfxo",
+                    nil)
+            end
         end
     end
-
-    if spi_mode == "spidrvMaster" then
-        if spi_bitrate > (freq / 2) then
-            validation.warning(
-            "Bitrate of SPI master mode must be equal or lower than half of the peripheral clock frequency",
-            validation.target_for_defines({str_spi_bitrate}),
-            "Set bitrate equal or lower than half of the peripheral clock frequency",
-            nil)
-        end
-    else
-        if slc.is_provided("device_generic_family_efr32xg22") or slc.is_provided("device_generic_family_efr32xg23") or slc.is_provided("device_generic_family_efr32xg24") then
-            if spi_bitrate > (freq / 6) then
+    if freq ~=nil then
+        if spi_mode == "spidrvMaster" then
+            if spi_bitrate > (freq / 2) then
                 validation.warning(
-                "Bitrate of SPI slave mode must be equal or lower than one sixth of the peripheral clock frequency",
+                "Bitrate of SPI master mode must be equal or lower than half of the peripheral clock frequency",
                 validation.target_for_defines({str_spi_bitrate}),
-                "Set bitrate equal or lower than one sixth of the peripheral clock frequency",
+                "Set bitrate equal or lower than half of the peripheral clock frequency",
                 nil)
             end
         else
-            if spi_bitrate > (freq / 8) then
-                validation.warning(
-                "Bitrate of SPI slave mode must be equal or lower than one eighth of the peripheral clock frequency",
-                validation.target_for_defines({str_spi_bitrate}),
-                "Set bitrate equal or lower than one eighth of the peripheral clock frequency",
-                nil)
+            if slc.is_provided("device_generic_family_efr32xg22") or slc.is_provided("device_generic_family_efr32xg23") or slc.is_provided("device_generic_family_efr32xg24") then
+                if spi_bitrate > (freq / 6) then
+                    validation.warning(
+                    "Bitrate of SPI slave mode must be equal or lower than one sixth of the peripheral clock frequency",
+                    validation.target_for_defines({str_spi_bitrate}),
+                    "Set bitrate equal or lower than one sixth of the peripheral clock frequency",
+                    nil)
+                end
+            else
+                if spi_bitrate > (freq / 8) then
+                    validation.warning(
+                    "Bitrate of SPI slave mode must be equal or lower than one eighth of the peripheral clock frequency",
+                    validation.target_for_defines({str_spi_bitrate}),
+                    "Set bitrate equal or lower than one eighth of the peripheral clock frequency",
+                    nil)
+                end
             end
         end
     end
-
-    if (config_control.value == "spidrvCsControlAuto") and config_cs == nil then
+    if config_control ~=nil and (config_control.value == "spidrvCsControlAuto") and config_cs == nil then
         local msg = instance .. " : SPIDRV is configured to control CS, but no CS pin is selected"
         validation.error(msg,
                         validation.target_for_defines({str_cs_port}),

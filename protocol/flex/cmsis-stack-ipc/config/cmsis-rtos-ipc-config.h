@@ -57,11 +57,6 @@
 // <i> The size in 32-bit words of the Application Framework task call stack.
 #define EMBER_AF_PLUGIN_CMSIS_RTOS_APP_FRAMEWORK_STACK_SIZE       (500)
 
-// <o EMBER_AF_PLUGIN_CMSIS_RTOS_APP_FRAMEWORK_YIELD_TIMEOUT_MS> Application Framework Task yield timeout
-// <i> Default: 1000000
-// <i> The Application Framework Task yield timeout in milliseconds. This is the most the application task shall yield. Upon timeout, the task will check again if yielding is possible.
-#define EMBER_AF_PLUGIN_CMSIS_RTOS_APP_FRAMEWORK_YIELD_TIMEOUT_MS (1000000)
-
 // <o EMBER_AF_PLUGIN_CMSIS_RTOS_MAX_CALLBACK_QUEUE_SIZE> Max callback queue size <5-20>
 // <i> Default: 10
 // <i> The maximum number of simultaneous callback messages from the stack task to the application tasks.

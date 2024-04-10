@@ -101,6 +101,22 @@ template_contribution:
       group: custom
       name: changeNwkKey
       handler: changeNwkKeyCommand
+    condition:
+      - zigbee_trust_center_nwk_key_update_broadcast
+  - name: cli_command
+    value:
+      group: custom
+      name: changeNwkKey
+      handler: changeNwkKeyCommand
+    condition:
+      - zigbee_trust_center_nwk_key_update_unicast
+  - name: cli_command
+    value:
+      group: custom
+      name: changeNwkKey
+      handler: changeNwkKeyCommand
+    condition:
+      - zigbee_test_harness
   - name: cli_command
     value:
       group: custom

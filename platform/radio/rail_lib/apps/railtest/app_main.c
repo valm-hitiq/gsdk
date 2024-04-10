@@ -367,7 +367,7 @@ void sl_rail_test_internal_app_init(void)
   getPti(NULL);
 
   // Set TX FIFO, and verify that the size is correct
-  if (configureTxFifo() != RAIL_STATUS_NO_ERROR) {
+  if (configureTxFifo(SL_RAIL_TEST_TX_BUFFER_SIZE) != SL_RAIL_TEST_TX_BUFFER_SIZE) {
     while (1) ;
   }
 
@@ -1547,11 +1547,13 @@ char *handleToString(RAIL_Handle_t railHandle)
   return "r";//for RAILtest vs MP configuration
 }
 
-RAIL_Status_t configureTxFifo(void)
+uint16_t configureTxFifo(uint16_t fifoBytes)
 {
-  uint16_t fifoSize = RAIL_SetTxFifo(railHandle, txFifo.fifo, 0, SL_RAIL_TEST_TX_BUFFER_SIZE);
-  if (fifoSize != SL_RAIL_TEST_TX_BUFFER_SIZE) {
-    return RAIL_STATUS_INVALID_PARAMETER;
+  if (fifoBytes == 0U) {
+    fifoBytes = SL_RAIL_TEST_TX_BUFFER_SIZE;
   }
-  return RAIL_STATUS_NO_ERROR;
+  if (fifoBytes > SL_RAIL_TEST_TX_BUFFER_SIZE) {
+    return 0U;
+  }
+  return RAIL_SetTxFifo(railHandle, txFifo.fifo, 0, fifoBytes);
 }

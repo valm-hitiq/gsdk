@@ -3,6 +3,12 @@
 The changes described in this file will possibly break the build and/or functionality of an
 existing application. The description serves the purpose of helping to fix the failing build.
 
+# 7.21.2 {#section-7-21-2}
+
+## Fix migration process from 7.17 to 7.18+
+The migration process of the controller is broken since 7.18.1. Restore this migration process.
+This process is used when a controller is updated from a version older than 7.18 to 7.18 or newer.
+
 # 7.21.1 {#section-7-21-1}
 
 ## Support

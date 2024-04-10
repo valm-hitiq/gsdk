@@ -45,7 +45,7 @@ ESL_CMD_MAX_RETRY_COUNT = 3
 ESL_CMD_MAX_PENDING_CONNECTION_REQUEST_COUNT = 2
 
 # Tags in a group in automated mode addressing
-ESL_MAX_TAGS_IN_AUTO_GROUP = 16
+ESL_MAX_TAGS_IN_AUTO_GROUP = 32
 
 # Default RSSI threshold in dBm
 RSSI_THRESHOLD = -60

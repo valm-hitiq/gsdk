@@ -5,42 +5,42 @@ The output of the size tool: (e.g. arm-none-ambi-size.exe)
 
 zwave_soc_wall_controller.out  :
 section                                       size         addr
-.text                                      0x2fa78          0x0
-_zaf_event_distributor_cc_event_handler       0x10      0x2fa78
-_zaf_cc_config                                 0x8      0x2fa88
-_cc_handlers_v3                              0x1d4      0x2fa90
-_zw_protocol_cmd_handlers                     0x70      0x2fc64
-_zw_protocol_cmd_handlers_lr                  0x30      0x2fcd4
-.ARM.exidx                                     0x8      0x2fd04
-.copy.table                                    0xc      0x2fd0c
-.zero.table                                    0x0      0x2fd18
+.text                                      0x2fa8c          0x0
+_zaf_event_distributor_cc_event_handler       0x10      0x2fa8c
+_zaf_cc_config                                 0x8      0x2fa9c
+_cc_handlers_v3                              0x1d4      0x2faa4
+_zw_protocol_cmd_handlers                     0x70      0x2fc78
+_zw_protocol_cmd_handlers_lr                  0x30      0x2fce8
+.ARM.exidx                                     0x8      0x2fd18
+.copy.table                                    0xc      0x2fd20
+.zero.table                                    0x0      0x2fd2c
 .stack                                      0x1000   0x20000000
 .data                                        0x41c   0x20001000
 .bss                                        0xa3e4   0x2000141c
 text_application_ram                           0x0   0x2000b800
 .heap                                        0x800   0x2000b800
-.internal_storage                          0x3a000      0x2fd18
-.zwave_nvm                                  0x3000      0x69d18
-.nvm                                        0x9000      0x6cd18
+.internal_storage                          0x3a000      0x2fd2c
+.zwave_nvm                                  0x3000      0x69d2c
+.nvm                                        0x9000      0x6cd2c
 .ARM.attributes                               0x2e          0x0
 .comment                                      0x45          0x0
 .debug_line_str                              0x29d          0x0
-.debug_frame                                0xf1e0          0x0
-.debug_info                               0xbcf3c5          0x0
-.debug_abbrev                              0x21b46          0x0
-.debug_loclists                            0x17fa5          0x0
-.debug_aranges                              0x5878          0x0
-.debug_rnglists                             0x35cc          0x0
-.debug_line                                0x5f44b          0x0
-.debug_str                                 0x84350          0x0
-.debug_loc                                 0x2d79c          0x0
-.debug_ranges                               0x4f30          0x0
-Total                                     0xdb8d63
+.debug_frame                                0xf1b4          0x0
+.debug_info                               0xbcf59f          0x0
+.debug_abbrev                              0x21b01          0x0
+.debug_loclists                            0x17f91          0x0
+.debug_aranges                              0x5870          0x0
+.debug_rnglists                             0x35db          0x0
+.debug_line                                0x5f465          0x0
+.debug_str                                 0x84318          0x0
+.debug_loc                                 0x2d764          0x0
+.debug_ranges                               0x4f48          0x0
+Total                                     0xdb8e95
 
 The calculated FLASH and SRAM usage summary:
 ============================================
 FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3)
-   196916
+   196936
 FLASH used for storage: (Including only the sections: .zwavenvm, .simee, .nvm, .zwave_nvm)
    49152
 SRAM usage:             (Including only the sections: .data, .bss, .heap (limited to 2048 per sl_memory_config.h), .stack_dummy, .reset_info)

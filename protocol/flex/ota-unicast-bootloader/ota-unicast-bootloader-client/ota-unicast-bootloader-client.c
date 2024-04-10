@@ -27,7 +27,7 @@
  *
  ******************************************************************************/
 
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include "ota-unicast-bootloader-client-config.h"
 
 #include "stack/include/ember.h"
@@ -165,7 +165,7 @@ static uint32_t getTotalSegmentsCount(void)
   uint32_t totalSegments =
     (uint32_t)(imageInfo.size / MAX_SEGMENT_PAYLOAD_LENGTH);
 
-  assert(imageInfo.size > 0);
+  CONNECT_STACK_ASSERT(imageInfo.size > 0);
 
   if ((imageInfo.size % MAX_SEGMENT_PAYLOAD_LENGTH) > 0) {
     totalSegments++;

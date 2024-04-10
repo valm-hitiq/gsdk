@@ -53,7 +53,6 @@ requires:
   - name: psa_driver
     condition: [trustzone_secure]
   - name: sl_si91x_psa_trng
-    from: wiseconnect3_sdk
     condition: [device_si91x]
   - name: emlib_cmu
     condition: [device_has_trng]

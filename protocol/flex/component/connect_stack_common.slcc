@@ -72,6 +72,7 @@ include:
           - "power_manager"
   - path: "stack/core"
     file_list:
+      - path: "sl-connect-assert.h"
       - path: "sli-connect-api.h"
       - path: "sli-connect-interrupt-manipulation.h"
       - path: "sli-connect-token.h"

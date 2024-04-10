@@ -1187,11 +1187,11 @@ void sli_bt_ots_client_on_bt_event(sl_bt_msg_t *evt)
             // Set status
             handle->status = CLIENT_STATUS_DISCONNECTED;
 
-            // Do callback
-            CALL_SAFE(handle, on_disconnect, handle);
-
             // Remove client from the list
             sl_slist_remove(&client_list, &handle->node);
+
+            // The callback should be invoked last, as this might free up allocated memory behind the handle.
+            CALL_SAFE(handle, on_disconnect, handle);
             break;
           }
         }

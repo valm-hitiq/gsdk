@@ -60,7 +60,7 @@ def log(*args, _half_indent_log :bool=False, **kwargs):
     ''' Print with 1 tab + 1 whitespace indentation '''
     args = [arg.replace('\n', '\n\t ') if isinstance(arg, str) else arg for arg in args]
     with lock:
-        print('\t' if not _half_indent_log else 3*' ', *args, file=sys.stdout if stdout else sys.stderr, **kwargs)
+        print('\t' if not _half_indent_log else 3*' ', *args, file=sys.stdout if stdout else sys.stderr, flush=True, **kwargs)
 
 class StreamHandler(logging.StreamHandler):
     def __init__(self):

@@ -206,14 +206,14 @@ static void sw_pwm_led_off(led_sw_pwm_t *instance)
 }
 #endif // gattdb_esl_led_info
 
+#ifdef SL_CATALOG_SIMPLE_LED_LED0_PRESENT
 // Power manager callback with some LED feedback
 static void pm_callback(sl_power_manager_em_t from,
                         sl_power_manager_em_t to)
 {
   (void)from;
-
-  #ifdef SL_CATALOG_SIMPLE_LED_LED0_PRESENT
   uint8_t basic_state = esl_core_get_basic_state_bit(ESL_BASIC_STATE_SYNCHRONIZED_BIT);
+
   switch (to) {
     case SL_POWER_MANAGER_EM0:
       if (led0_feedback_enabled) {
@@ -243,9 +243,6 @@ static void pm_callback(sl_power_manager_em_t from,
     default:
       break;
   }
-  #else // SL_CATALOG_SIMPLE_LED_LED0_PRESENT
-  (void)to;
-  #endif // SL_CATALOG_SIMPLE_LED_LED0_PRESENT
 }
 
 static sl_power_manager_em_transition_event_handle_t event_handle;
@@ -254,14 +251,21 @@ static sl_power_manager_em_transition_event_info_t event_info = {
                 | SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM0,
   .on_event = pm_callback,
 };
+#endif // SL_CATALOG_SIMPLE_LED_LED0_PRESENT
 
 /**************************************************************************//**
  * Application Init.
  *****************************************************************************/
 SL_WEAK void app_init(void)
 {
+#ifdef SL_CATALOG_SIMPLE_LED_LED0_PRESENT
+  // Provide optical feedback of the ESL internal status through led 0 instance
+  // Attention! Enable for debugging purposes only, as the vast increase in EM2
+  // wake-up time can increase the average power consumption of the synchronized
+  // ESL by up to 3uAh!
   sl_power_manager_init();
   sl_power_manager_subscribe_em_transition_event(&event_handle, &event_info);
+#endif // SL_CATALOG_SIMPLE_LED_LED0_PRESENT
 
   /////////////////////////////////////////////////////////////////////////////
   // Put your additional application init code here!                         //
@@ -541,14 +545,12 @@ sl_status_t esl_sensor_custom_read(uint8_t index,
 
 void esl_core_unassociate_callback(void)
 {
-  uint8_t device_index;
-
   sl_bt_esl_log(ESL_LOG_COMPONENT_APP,
                 ESL_LOG_LEVEL_INFO,
                 "Execute unassociate callback");
 
   #ifdef gattdb_esl_led_info
-  device_index = esl_led_get_count();
+  uint8_t device_index = esl_led_get_count();
 
   // disable all available LED on board
   while (device_index--) {

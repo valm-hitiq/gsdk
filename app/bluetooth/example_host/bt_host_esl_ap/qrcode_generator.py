@@ -146,7 +146,7 @@ def generate_qrcode(data, height, width):
     # Create bytes from image
     img_xbm = XbmConverter(result)
     xbm = img_xbm.convert()
-    return xbm
+    return xbm, result
 
 
 def merge_qr_hex(qrcode, ihex, sa, hex_file_out="merged.hex"):

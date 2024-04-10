@@ -98,6 +98,10 @@ const uint32_t linker_sg_begin @ "Veneer$$CMSE";
 #endif
 typedef void (*tz_nonsecure_function_void)(void) __attribute__((cmse_nonsecure_call));
 
+#ifdef BOOTLOADER_SUPPORT_STORAGE
+extern const BootloaderStorageFunctions_t storageFunctions;
+#endif
+
 // -----------------------------------------------------------------------------
 // Bootloader main stage table
 

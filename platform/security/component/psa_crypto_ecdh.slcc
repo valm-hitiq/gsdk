@@ -13,6 +13,14 @@ requires:
     condition: [device_series_0]
   - name: mbedtls_ecdh
     condition: [device_series_1]
+  - name: sl_si91x_psa_ecdh
+    condition: [device_si91x]
+  - name: mbedtls_ecdh
+    condition: [device_si91x, psa_crypto_ecc_secp224r1]
+  - name: mbedtls_ecdh
+    condition: [device_si91x, psa_crypto_ecc_secp384r1]
+  - name: mbedtls_ecdh
+    condition: [device_si91x, psa_crypto_ecc_secp521r1]
   # EFR32xG21 (SDID:200) does not support acceleration of the SECP224R1 curve.
   - name: mbedtls_ecdh
     condition: [device_sdid_200, psa_crypto_ecc_secp224r1]

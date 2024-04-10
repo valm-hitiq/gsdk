@@ -146,8 +146,8 @@ void esl_lib_init(char *config)
 void esl_lib_process_action(void)
 {
   esl_lib_core_step();
-  esl_lib_connection_step();
   esl_lib_pawr_step();
+  esl_lib_connection_step();
   esl_lib_image_transfer_step();
 }
 
@@ -173,16 +173,20 @@ sl_status_t esl_lib_core_add_command(esl_lib_command_list_cmd_t *cmd)
 
 void sl_bt_on_event(sl_bt_msg_t *evt)
 {
+  esl_lib_pawr_on_bt_event(evt);
   esl_lib_image_transfer_on_bt_event(evt);
   esl_lib_connection_on_bt_event(evt);
-  esl_lib_pawr_on_bt_event(evt);
   esl_lib_core_on_bt_event(evt);
   esl_lib_ap_control_on_bt_event(evt);
 }
 
 void esl_lib_core_connection_complete()
 {
-  ap_state->command_complete = true;
+  // This function should only be called after the ESL_LIB_CMD_CONNECT request is processed (with or without error)
+  if (ap_state->command == NULL) {
+    // Since the ESL_LIB_CMD_CONNECT request is the owner of the command, the ap_state->command should be NULL
+    ap_state->command_complete = true;
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -562,7 +566,6 @@ static void run_command(esl_lib_command_list_cmd_t *cmd)
           } else {
             sc = SL_STATUS_INVALID_STATE;
           }
-          ap_state->command_complete = true;
         } else {
           lib_status = ESL_LIB_STATUS_SCAN_STOP_FAILED;
           sc = sl_bt_scanner_stop();

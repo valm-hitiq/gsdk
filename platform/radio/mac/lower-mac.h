@@ -60,8 +60,15 @@ enum
 
 extern LowerMacState sli_802154mac_lower_mac_state;
 #ifdef HIGH_DATARATE_PHY
-#define PHY_HEADER_SIZE_ADJUST_2MBPS    3u
+#define PHY_HEADER_SIZE_ADJUST_2MBPS    4u
 #define HIGH_DATARATE_PHY_PACKET_START_INDEX  1u
+// 802.15.4 2-byte PHR
+// Spec: [       0     |    1-2   |     3    |     4     |     5-15     ]
+//       [ Mode Switch | Reserved | FCS Type | Whitening | Frame Length ]
+// RBIT: [      15     |   14-13  |    12    |    11     |     10-0     ]
+#define PHR2BYTE_REV_LENGTH_MASK (0x07FFu) // <10:0> 11-bit length field
+#define PHR2BYTE_REV_WHITEN_MASK (0x0800u) // <11> 0=unwhitened, 1=whitened
+#define PHR2BYTE_REV_CRC_2_MASK  (0x1000u) // <12> 0=4-byte CRC, 1=2-byte CRC
 #endif //HIGH_DATARATE_PHY
 // MAC TX Options Bitmask
 #ifdef DOXYGEN_SHOULD_SKIP_THIS

@@ -51,27 +51,29 @@ for k, v in pairs(spidrv.instances) do
             end
         end
     else
-        local hfxo_frequency = tonumber(slc.config("SL_DEVICE_INIT_HFXO_FREQ").value)
-        if hfxo_frequency / spi_bitrate > max_clkdiv then
-            validation.warning(
-            "clkdiv is too high, need to be equal or smaller than 256",
-            validation.target_for_defines({str_spi_bitrate}),
-            "Set a higher bitrate or lower the reference clock hfxo",
-            nil)
-        elseif hfxo_frequency / spi_bitrate < min_clkdiv then
-            validation.warning(
-            "clkdiv is too low, need to be equal or higher than 1",
-            validation.target_for_defines({str_spi_bitrate}),
-            "Set a lower bitrate or higher the reference clock hfxo",
-            nil)
+        if slc.config("SL_DEVICE_INIT_HFXO_FREQ") ~= nil then
+            local hfxo_frequency = tonumber(slc.config("SL_DEVICE_INIT_HFXO_FREQ").value)
+            if hfxo_frequency / spi_bitrate > max_clkdiv then
+                validation.warning(
+                "clkdiv is too high, need to be equal or smaller than 256",
+                validation.target_for_defines({str_spi_bitrate}),
+                "Set a higher bitrate or lower the reference clock hfxo",
+                nil)
+            elseif hfxo_frequency / spi_bitrate < min_clkdiv then
+                validation.warning(
+                "clkdiv is too low, need to be equal or higher than 1",
+                validation.target_for_defines({str_spi_bitrate}),
+                "Set a lower bitrate or higher the reference clock hfxo",
+                nil)
+            end
         end
     end
     
-    if (config_control.value == "spidrvCsControlAuto") and config_cs == nil then
-        local msg = instance .. " : SPIDRV is configured to control CS, but no CS pin is selected"
-        validation.error(msg,
-                        validation.target_for_defines({str_cs_port}),
-                        "CS must be controlled by the application, or a CS pin must be configured",
-                        nil)
+    if config_control ~=nil and (config_control.value == "spidrvCsControlAuto") and config_cs == nil then
+    local msg = instance .. " : SPIDRV is configured to control CS, but no CS pin is selected"
+    validation.error(msg,
+                    validation.target_for_defines({str_cs_port}),
+                    "CS must be controlled by the application, or a CS pin must be configured",
+                    nil)
     end
 end

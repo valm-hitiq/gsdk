@@ -623,7 +623,7 @@ static void _rrq_hnd(sl_tftp_clnt_t * const clnt,
   uint32_t timeout = 0UL;
   uint16_t pkt_payload_size = 0U;
   uint16_t block_num = 1U;
-  static uint8_t host_addr[SL_TFTP_ADDR_SIZE] = { 0U };
+  void * host_addr = NULL;
   int32_t res = SL_FTP_ERROR;
 
   sock_id = sl_tftp_udp_socket_create();
@@ -632,7 +632,12 @@ static void _rrq_hnd(sl_tftp_clnt_t * const clnt,
     return;
   }
 
-  sl_tftp_udp_get_addr_bytes(clnt->host, clnt->port, host_addr, SL_TFTP_ADDR_SIZE);
+  host_addr = sl_tftp_udp_get_addr(clnt->host, clnt->port);
+  if (host_addr == NULL) {
+    sl_tftp_socket_close(sock_id);
+    printf("[TFTP Address error]\n");
+    return;
+  }
 
   pkt_payload_size = _build_packet(&clnt->packet, buff, buff_size);
   (void) sl_tftp_udp_sendto(sock_id, buff, pkt_payload_size, host_addr);
@@ -685,7 +690,7 @@ static void _rrq_hnd(sl_tftp_clnt_t * const clnt,
 
     timeout = 0UL;
   }
-
+  sl_tftp_udp_free_addr(host_addr);
   sl_tftp_socket_close(sock_id);
 }
 
@@ -698,7 +703,7 @@ static void _wrq_hnd(sl_tftp_clnt_t * const clnt,
   uint16_t pkt_payload_size = 0U;
   uint16_t block_num = 0U;
   uint16_t required_block_num = 0U;
-  static uint8_t host_addr[SL_TFTP_ADDR_SIZE] = { 0U };
+  void * host_addr = NULL;
   int32_t res = SL_FTP_ERROR;
   uint8_t *ptr = NULL;
   uint32_t remained_size = 0UL;
@@ -710,7 +715,12 @@ static void _wrq_hnd(sl_tftp_clnt_t * const clnt,
     return;
   }
 
-  sl_tftp_udp_get_addr_bytes(clnt->host, clnt->port, host_addr, SL_TFTP_ADDR_SIZE);
+  host_addr = sl_tftp_udp_get_addr(clnt->host, clnt->port);
+  if (host_addr == NULL) {
+    sl_tftp_socket_close(sock_id);
+    printf("[TFTP Address error]\n");
+    return;
+  }
 
   pkt_payload_size = _build_packet(&clnt->packet, buff, buff_size);
   (void) sl_tftp_udp_sendto(sock_id, buff, pkt_payload_size, host_addr);
@@ -718,7 +728,6 @@ static void _wrq_hnd(sl_tftp_clnt_t * const clnt,
   ptr = (uint8_t *) clnt->ext_data;
   remained_size = clnt->ext_data_size;
   required_block_num = remained_size / SL_TFTP_DATA_BLOCK_SIZE + 1U;
-  sl_tftp_debug("Prepare transfer: 0x%p address,  %lu bytes\n", ptr, remained_size);
 
   while (timeout < SL_TFTP_CLNT_RECV_TIMEOUT_MS) {
     sl_tftp_delay_ms(100UL);
@@ -740,7 +749,6 @@ static void _wrq_hnd(sl_tftp_clnt_t * const clnt,
 
     if (clnt->packet.opcode == SL_TFTP_OPCODE_ACK) {
       if (!remained_size && block_num == required_block_num) {
-        sl_tftp_debug("Received last ack\n");
         break;
       }
       // reset timeout counter
@@ -774,7 +782,7 @@ static void _wrq_hnd(sl_tftp_clnt_t * const clnt,
     sl_tftp_dump_buff(ptr, data_size);
 #endif
   }
-  sl_tftp_debug("Closing WRQ socket\n");
+  sl_tftp_udp_free_addr(host_addr);
   sl_tftp_socket_close(sock_id);
 }
 
@@ -801,9 +809,8 @@ static void _clnt_thr_fnc(void * args)
       sl_tftp_delay_ms(100UL);
       continue;
     }
-    sl_tftp_debug("TFTP Client started\n");
-
 #if defined(SL_TFTP_DEBUG)
+    sl_tftp_debug("TFTP Client started\n");
     sl_tftp_clnt_print_pkt(&clnt.packet);
 #endif
 
@@ -818,8 +825,10 @@ static void _clnt_thr_fnc(void * args)
     (void) osEventFlagsClear(clnt.evt_flags, SL_TFTP_EVT_ALL_MSK);
     (void) osEventFlagsSet(clnt.evt_flags, SL_TFTP_EVT_OP_FINISHED_MSK);
 
-    // sl_tftp_socket_close(sock_id);
+#if defined(SL_TFTP_DEBUG)
     sl_tftp_debug("TFTP Client socket closed\n");
+#endif
+
     sl_tftp_delay_ms(100UL);
   }
 }

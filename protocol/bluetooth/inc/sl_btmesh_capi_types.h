@@ -709,6 +709,16 @@ typedef enum {
 
   mesh_instr_tx_complete = 0x22,
   mesh_instr_tx_cancelled = 0x23,
+
+  mesh_instr_friend_pdu_queued = 0x24,
+  mesh_instr_friend_pdu_relayed = 0x25,
+  mesh_instr_friend_pdu_removed = 0x26,
+
+  mesh_instr_trans_sdu_handled = 0x27,
+  mesh_instr_trans_sdu_not_handled = 0x28,
+
+  mesh_instr_trans_sdu_decryption_failure = 0x29,
+  mesh_instr_trans_sdu_decrypted = 0x2a,
 } mesh_instr_event_t;
 
 /** Instrumentation result codes for dropping a network PDU */
@@ -717,6 +727,7 @@ typedef enum {
   mesh_instr_net_pdu_dropped_invalid_src = 0x01,
   mesh_instr_net_pdu_dropped_invalid_dst = 0x02,
   mesh_instr_net_pdu_dropped_internal_error = 0x03,
+  mesh_instr_net_pdu_dropped_lpn_discard = 0x04,
   mesh_instr_net_pdu_dropped_reason_last
 } mesh_instr_net_pdu_dropped_reason_t;
 
@@ -732,6 +743,7 @@ typedef enum {
   mesh_instr_net_pdu_not_relayed_hop_limit = 0x01,
   mesh_instr_net_pdu_not_relayed_out_of_memory = 0x02,
   mesh_instr_net_pdu_not_relayed_internal_error = 0x03,
+  mesh_instr_net_pdu_not_relayed_no_proxy = 0x04,
   mesh_instr_net_pdu_not_relayed_reason_last
 } mesh_instr_net_pdu_not_relayed_reason_t;
 
@@ -754,8 +766,18 @@ typedef enum {
   mesh_instr_trans_pdu_not_handled_out_of_recv = 0x06,
   mesh_instr_trans_pdu_not_handled_out_of_memory = 0x07,
   mesh_instr_trans_pdu_not_handled_header_mismatch = 0x08,
+  mesh_instr_trans_pdu_not_handled_replayed_pdu = 0x09,
+  mesh_instr_trans_pdu_not_handled_internal_error = 0x0a,
   mesh_instr_trans_pdu_not_handled_reason_last
 } mesh_instr_trans_pdu_not_handled_reason_t;
+
+/** Instrumentation result codes for not handling a received transport SDU */
+typedef enum {
+  mesh_instr_trans_sdu_not_handled_lpn_message = 0x00,
+  mesh_instr_trans_sdu_not_handled_no_decryption = 0x01,
+  mesh_instr_trans_sdu_not_handled_internal_error = 0x02,
+  mesh_instr_trans_sdu_not_handled_reason_last
+} mesh_instr_trans_sdu_not_handled_reason_t;
 
 /** Instrumentation result codes for not sending a transport layer acknowledgement */
 typedef enum {
@@ -809,6 +831,15 @@ typedef enum {
   mesh_instr_trans_send_sender_cancelled = 0x05,
   mesh_instr_trans_send_status_last
 } mesh_instr_trans_send_status_t;
+
+/** Instrumentation result codes for removing a PDU from network queue */
+typedef enum {
+  mesh_instr_friend_pdu_removed_sent = 0x00,
+  mesh_instr_friend_pdu_removed_old_pdu = 0x01,
+  mesh_instr_friend_pdu_removed_old_segack = 0x02,
+  mesh_instr_friend_pdu_removed_old_segment = 0x03,
+  mesh_instr_friend_pdu_removed_reason_last,
+} mesh_instr_friend_pdu_removed_reason_t;
 
 /** Mesh stack statistics counters */
 typedef struct {
@@ -873,6 +904,22 @@ typedef struct {
   uint32_t trans_sender_timer_set;
   /** Transport sender timer expired counter */
   uint32_t trans_sender_timer_expired;
+
+  /** Friend PDU queued counter */
+  uint32_t friend_pdu_queued;
+  /** Friend PDU relayed counter */
+  uint32_t friend_pdu_relayed;
+  /** Friend PDU removed counter */
+  uint32_t friend_pdu_removed[mesh_instr_friend_pdu_removed_reason_last];
+
+  /** Transport SDU processed counter */
+  uint32_t trans_sdu_handled;
+  /** Transport SDU not handled counter */
+  uint32_t trans_sdu_not_handled[mesh_instr_trans_sdu_not_handled_reason_last];
+  /** Transport decryption failure counter */
+  uint32_t trans_sdu_decryption_failure;
+  /** Transport decryption success counter */
+  uint32_t trans_sdu_decrypted;
 } mesh_statistics_t;
 
 /** Instrumentation result codes for not sending an advertisement */

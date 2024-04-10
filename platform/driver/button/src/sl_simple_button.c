@@ -86,6 +86,46 @@ sl_status_t sl_simple_button_init(const sl_button_t *handle)
 
   if (simple_button->mode == SL_SIMPLE_BUTTON_MODE_INTERRUPT) {
     GPIOINT_Init();
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+    // Try to register an EM4WU interrupt for the given pin
+    interrupt = GPIOINT_EM4WUCallbackRegisterExt(simple_button->port,
+                                                 simple_button->pin,
+                                                 (GPIOINT_IrqCallbackPtrExt_t)sli_simple_button_on_change,
+                                                 button);
+    if (interrupt == INTERRUPT_UNAVAILABLE) {
+      // if the pin not EM4WU-compatible, instead register a regualr interrupt
+      interrupt = GPIOINT_CallbackRegisterExt(simple_button->pin,
+                                              (GPIOINT_IrqCallbackPtrExt_t)sli_simple_button_on_change,
+                                              button);
+      EFM_ASSERT(interrupt != INTERRUPT_UNAVAILABLE);
+      GPIO_ExtIntConfig(simple_button->port,
+                        simple_button->pin,
+                        interrupt,
+                        true,
+                        true,
+                        true);
+    } else {
+      // If the pin is EM4WU-compatible, setup the pin as an EM4WU pin
+      GPIO_EM4WUExtIntConfig(simple_button->port,
+                             simple_button->pin,
+                             interrupt,
+                             SL_SIMPLE_BUTTON_POLARITY,
+                             true);
+
+      // Since EM4WU interrupts are level-sensitive and not edge-sensitive, also register a regular edge-sensitive interrupt to capture the other edge
+      interrupt = GPIOINT_CallbackRegisterExt(simple_button->pin,
+                                              (GPIOINT_IrqCallbackPtrExt_t)sli_simple_button_on_change,
+                                              button);
+      EFM_ASSERT(interrupt != INTERRUPT_UNAVAILABLE);
+      GPIO_ExtIntConfig(simple_button->port,
+                        simple_button->pin,
+                        interrupt,
+                        (SL_SIMPLE_BUTTON_POLARITY == 0U), // Register a Rising Edge interrupt for an Active Low button
+                        (SL_SIMPLE_BUTTON_POLARITY == 1U), // Register a Falling Edge interrupt for an Active High button
+                        true);
+    }
+#else
     interrupt = GPIOINT_CallbackRegisterExt(simple_button->pin,
                                             (GPIOINT_IrqCallbackPtrExt_t)sli_simple_button_on_change,
                                             button);
@@ -96,6 +136,7 @@ sl_status_t sl_simple_button_init(const sl_button_t *handle)
                       true,
                       true,
                       true);
+#endif
   }
 
   return SL_STATUS_OK;

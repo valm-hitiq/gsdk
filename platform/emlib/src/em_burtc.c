@@ -244,7 +244,9 @@ void BURTC_Enable(bool enable)
     BURTC_Stop();
     BURTC_SyncWait(); /* Wait for the stop to synchronize */
     BURTC->EN_CLR = BURTC_EN_EN;
-#if defined(_BURTC_EN_DISABLING_MASK)
+#if defined(_BURTC_SYNCBUSY_EN_MASK)
+    regSync(BURTC_SYNCBUSY_EN);
+#elif defined(_BURTC_EN_DISABLING_MASK)
     while (BURTC->EN & _BURTC_EN_DISABLING_MASK) {
       /* Wait for disabling to finish */
     }

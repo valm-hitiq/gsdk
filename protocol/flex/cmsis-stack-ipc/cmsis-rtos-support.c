@@ -27,7 +27,7 @@
  *
  ******************************************************************************/
 
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include "sl_component_catalog.h"
 
 #include "cmsis-rtos-ipc-config.h"
@@ -64,13 +64,13 @@ void emberAfPluginCmsisRtosIpcInit(void)
 
 void emberAfPluginCmsisRtosAcquireBufferSystemMutex(void)
 {
-  assert(osMutexAcquire(bufferSystemMutex,
-                        osWaitForever) == osOK);
+  CONNECT_STACK_ASSERT(osMutexAcquire(bufferSystemMutex,
+                                      osWaitForever) == osOK);
 }
 
 void emberAfPluginCmsisRtosReleaseBufferSystemMutex(void)
 {
-  assert(osMutexRelease(bufferSystemMutex) == osOK);
+  CONNECT_STACK_ASSERT(osMutexRelease(bufferSystemMutex) == osOK);
 }
 
 //------------------------------------------------------------------------------
@@ -99,10 +99,10 @@ void emAfPluginCmsisRtosInitTasks(void)
   connectStackId = osThreadNew(emAfPluginCmsisRtosStackTask,
                                NULL,
                                &connectStackattribute);
-  assert(connectStackId != 0);
+  CONNECT_STACK_ASSERT(connectStackId != 0);
 
   bufferSystemMutex = osMutexNew(NULL);
-  assert(bufferSystemMutex != NULL);
+  CONNECT_STACK_ASSERT(bufferSystemMutex != NULL);
 
   emAfPluginCmsisRtosIpcInit();
 
@@ -122,7 +122,7 @@ void emAfPluginCmsisRtosInitTasks(void)
   appFrameworkId = osThreadNew(emAfPluginCmsisRtosAppFrameworkTask,
                                NULL,
                                &appFrameWorkattribute);
-  assert(appFrameworkId != 0);
+  CONNECT_STACK_ASSERT(appFrameworkId != 0);
 }
 
 //------------------------------------------------------------------------------
@@ -153,6 +153,6 @@ bool emAfPluginCmsisStackIdleHandler(uint32_t *idleTimeMs)
 {
   (void)idleTimeMs;
 
-  assert(0);
+  CONNECT_STACK_ASSERT(0);
   return false;
 }

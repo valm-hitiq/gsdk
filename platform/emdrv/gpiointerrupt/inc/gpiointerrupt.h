@@ -32,6 +32,7 @@
 #define GPIOINTERRUPT_H
 
 #include "em_device.h"
+#include "em_gpio.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -78,6 +79,13 @@ void GPIOINT_CallbackRegister(uint8_t intNo, GPIOINT_IrqCallbackPtr_t callbackPt
 unsigned int GPIOINT_CallbackRegisterExt(uint8_t pin, GPIOINT_IrqCallbackPtrExt_t callbackPtr, void *callbackCtx);
 __STATIC_INLINE void GPIOINT_CallbackUnRegister(uint8_t intNo);
 
+#if defined(_SILICON_LABS_32B_SERIES_2)
+unsigned int GPIOINT_EM4WUCallbackRegisterExt(GPIO_Port_TypeDef port,
+                                              uint8_t pin,
+                                              GPIOINT_IrqCallbackPtrExt_t callbackPtr,
+                                              void *callbackCtx);
+__STATIC_INLINE void GPIOINT_EM4WUCallbackUnRegister(uint8_t intNo);
+#endif
 /***************************************************************************//**
  * @brief
  *   Unregister user callback for a given pin interrupt number.
@@ -93,6 +101,28 @@ __STATIC_INLINE void GPIOINT_CallbackUnRegister(uint8_t intNo)
 {
   GPIOINT_CallbackRegister(intNo, 0);
 }
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/***************************************************************************//**
+ * @brief
+ *   Unregister user EM4WU callback for a given pin interrupt number.
+ *
+ * @details
+ *   Use this function to unregister a EM4WU callback.
+ *
+ * @param[in] intNo
+ *   Pin interrupt number for the EM4WU callback.
+ *
+ ******************************************************************************/
+__STATIC_INLINE void GPIOINT_EM4WUCallbackUnRegister(uint8_t intNo)
+{
+#if defined(_GPIO_IEN_EM4WUIEN_SHIFT)
+  GPIOINT_CallbackRegister(_GPIO_IEN_EM4WUIEN_SHIFT + intNo, 0);
+#else
+  GPIOINT_CallbackRegister(_GPIO_IEN_EM4WUIEN0_SHIFT + intNo, 0);
+#endif
+}
+#endif
 
 /** @} (end addtogroup gpioint) */
 #ifdef __cplusplus

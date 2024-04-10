@@ -231,7 +231,7 @@ typedef struct
     uint32_t    timestamp;
 } rxPacketDetails;
 
-typedef struct 
+typedef struct
 {
     rxPacketDetails packetInfo;
     uint8_t         psdu[IEEE802154_MAX_LENGTH];
@@ -1007,7 +1007,13 @@ static inline void setInternalFlag(uint16_t flag, bool val)
 // Returns true if the passed flag is set, false otherwise.
 static inline bool getInternalFlag(uint16_t flag)
 {
-    return ((miscRadioState & flag) != 0);
+    bool isFlagSet;
+    CORE_DECLARE_IRQ_STATE;
+    CORE_ENTER_ATOMIC();
+    isFlagSet = (miscRadioState & flag) ? true : false;
+    CORE_EXIT_ATOMIC();
+
+    return isFlagSet;
 }
 
 static inline bool txWaitingForAck(void)
@@ -1526,11 +1532,11 @@ otRadioState otPlatRadioGetState(otInstance *aInstance)
     case RAIL_RF_STATE_RX_ACTIVE:
         radioState = OT_RADIO_STATE_RECEIVE;
         break;
-    
+
     case RAIL_RF_STATE_TX_ACTIVE:
         radioState = OT_RADIO_STATE_TRANSMIT;
         break;
-    
+
     case RAIL_RF_STATE_IDLE:
         radioState = OT_RADIO_STATE_SLEEP;
         break;
@@ -1682,6 +1688,7 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
 
         OT_ASSERT(!getInternalFlag(FLAG_ONGOING_TX_DATA));
         OT_ASSERT(aFrame == &sTransmitFrame);
+        OT_ASSERT(aFrame->mPsdu == sTransmitPsdu);
 
         setInternalFlag(RADIO_TX_EVENTS, false);
         sTxFrame       = aFrame;
@@ -2589,7 +2596,7 @@ static void packetReceivedCallback(RAIL_RxPacketHandle_t packetHandle)
 
 #if SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT > 1
     if(!packetDetails.isAck)
-    { 
+    {
         receiveBufferInUse = getFreeBufferIndex();
         otEXPECT_ACTION(receiveBufferInUse < SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT, dropPacket = true);
         psdu = sReceivePacket[receiveBufferInUse].psdu;
@@ -2693,7 +2700,7 @@ exit:
         (void) RAIL_ReleaseRxPacket(gRailHandle, packetHandle);
         (void) handlePhyStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_CORRUPTED,
                                    (uint32_t) isReceivingFrame());
-    }	
+    }
 }
 
 static void packetSentCallback(bool isAck)
@@ -3045,10 +3052,10 @@ static void RAILCb_Generic(RAIL_Handle_t aRailHandle, RAIL_Events_t aEvents)
         railDebugCounters.mRailPlatRadioEnergyScanDoneCbCount++;
 #endif
     }
-    // scheduled and unscheduled config events happen very often, 
+    // scheduled and unscheduled config events happen very often,
     // especially in a DMP situation where there is an active BLE connection.
-    // Waking up the OT RTOS task on every one of these occurrences causes 
-    // a lower priority CLI task to starve and makes it appear like a code lockup 
+    // Waking up the OT RTOS task on every one of these occurrences causes
+    // a lower priority CLI task to starve and makes it appear like a code lockup
     // There is no reason to wake the OT task for these events!
     if ( !(aEvents & RAIL_EVENT_CONFIG_SCHEDULED) &&  !(aEvents & RAIL_EVENT_CONFIG_UNSCHEDULED)) {
         otSysEventSignalPending();
@@ -3068,7 +3075,7 @@ static bool validatePacketDetails(RAIL_RxPacketHandle_t   packetHandle,
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
     rxDebugStep = 0;
 #endif
-    
+
     rStatus = RAIL_GetRxPacketDetailsAlt(gRailHandle, packetHandle, pPacketDetails);
     otEXPECT_ACTION(rStatus == RAIL_STATUS_NO_ERROR, pktValid = false);
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
@@ -3364,7 +3371,7 @@ static void processTxComplete(otInstance *aInstance)
 {
     otError      txStatus;
     otRadioFrame *ackFrame = NULL;
-    
+
     if(getInternalFlag(RADIO_TX_EVENTS))
     {
         if(getInternalFlag(EVENT_TX_SUCCESS))

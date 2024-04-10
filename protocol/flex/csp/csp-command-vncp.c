@@ -17,7 +17,7 @@
 // *** Generated file. Do not edit! ***
 // vNCP Version: 1.0
 
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include "stack/include/ember.h"
 #include "ncp/ncp-security.h"
 #include "stack/core/sli-connect-api.h"
@@ -1510,7 +1510,7 @@ static void getDefaultChannelCommandHandler(uint8_t *apiCommandData)
 
 void handleIncomingApiCommand(uint16_t commandId, uint8_t *apiCommandData)
 {
-  assert(isCurrentTaskStackTask());
+  CONNECT_STACK_ASSERT(isCurrentTaskStackTask());
 
   switch (commandId) {
     case EMBER_NETWORK_STATE_IPC_COMMAND_ID:

@@ -48,7 +48,7 @@
 // <gpio> SL_BOARD_ENABLE_VCOM
 // $[GPIO_SL_BOARD_ENABLE_VCOM]
 #define SL_BOARD_ENABLE_VCOM_PORT               gpioPortA
-#define SL_BOARD_ENABLE_VCOM_PIN                8
+#define SL_BOARD_ENABLE_VCOM_PIN                9
 // [GPIO_SL_BOARD_ENABLE_VCOM]$
 
 // <gpio> SL_BOARD_ENABLE_DISPLAY

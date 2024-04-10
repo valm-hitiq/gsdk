@@ -27,7 +27,7 @@
  *
  ******************************************************************************/
 
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include "callback_dispatcher.h"
 #include "app_framework_callback.h"
 #include "stack/core/sl-connect-watchdog.h"
@@ -57,7 +57,7 @@ static uint32_t savedResetCause;
 
 void connect_standard_phy_2_4g(void)
 {
-  assert(emberPhyConfigInit(EMBER_STANDARD_PHY_2_4GHZ) == EMBER_SUCCESS);
+  CONNECT_STACK_ASSERT(emberPhyConfigInit(EMBER_STANDARD_PHY_2_4GHZ) == EMBER_SUCCESS);
 }
 
 void connect_stack_init(void)
@@ -76,7 +76,7 @@ void connect_stack_init(void)
   // Initialize the radio and the stack.  If this fails, we have to assert
   // because something is wrong.
   status = stack_init();
-  assert(status == EMBER_SUCCESS);
+  CONNECT_STACK_ASSERT(status == EMBER_SUCCESS);
 }
 
 uint32_t emberAfGetResetCause(void)

@@ -149,7 +149,7 @@ bool emberAfOnOffClusterOffCallback(void)
     emberAfPluginZllOnOffServerOffZllExtensions(emberAfCurrentCommand());
   }
 #endif
-  emberAfSendImmediateDefaultResponse(status);
+  UNUSED_VAR(status);
   return true;
 }
 
@@ -163,7 +163,7 @@ bool emberAfOnOffClusterOnCallback(void)
     emberAfPluginZllOnOffServerOnZllExtensions(emberAfCurrentCommand());
   }
 #endif
-  emberAfSendImmediateDefaultResponse(status);
+  UNUSED_VAR(status);
   return true;
 }
 
@@ -177,7 +177,7 @@ bool emberAfOnOffClusterToggleCallback(void)
     emberAfPluginZllOnOffServerToggleZllExtensions(emberAfCurrentCommand());
   }
 #endif
-  emberAfSendImmediateDefaultResponse(status);
+  UNUSED_VAR(status);
   return true;
 }
 

@@ -28,7 +28,6 @@
  *
  ******************************************************************************/
 
-#include "em_gpio.h"
 #include "em_core.h"
 #include "gpiointerrupt.h"
 #include "sl_assert.h"
@@ -125,6 +124,95 @@ void GPIOINT_CallbackRegister(uint8_t intNo, GPIOINT_IrqCallbackPtr_t callbackPt
     gpioCallbacks[intNo].context_flag = false;
     )
 }
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/***************************************************************************//**
+ * @brief
+ *   Registers user em4 wakeup callback for given port and pin interrupt number.
+ *
+ * @details
+ *   Use this function to register an EM4 wakeup callback with context which shall
+ *   be called upon interrupt generated for a given pin number.
+ *   The function will return an interrupt number if one is available and pin is
+ *   EM4WU compatible.
+ *   Interrupt itself must be configured externally.
+ *
+ * @param[in] port
+ *   GPIO Port for the callback.
+ * @param[in] pin
+ *   Pin number for the callback.
+ * @param[in] callbackPtr
+ *   A pointer to callback function.
+ * @param[in] callbackCtx
+ *   A pointer to the callback context.
+ *
+ * @return
+ *   Interrupt number, or INTERRUPT_UNAVAILABLE if all are in use or pin doesn't
+ *   support em4 wakeup.
+ ******************************************************************************/
+unsigned int GPIOINT_EM4WUCallbackRegisterExt(GPIO_Port_TypeDef port,
+                                              uint8_t pin,
+                                              GPIOINT_IrqCallbackPtrExt_t callbackPtr,
+                                              void *callbackCtx)
+{
+  CORE_DECLARE_IRQ_STATE;
+  unsigned int intNo = INTERRUPT_UNAVAILABLE;
+
+  CORE_ENTER_ATOMIC();
+
+  if (false) {
+    /* Check all the EM4WU Pins and check if given pin matches any of them. */
+#if defined(GPIO_EM4WU0_PORT)
+  } else if (GPIO_EM4WU0_PORT == port && GPIO_EM4WU0_PIN == pin) {
+    intNo = 0;
+#endif
+#if defined(GPIO_EM4WU3_PORT)
+  } else if (GPIO_EM4WU3_PORT == port && GPIO_EM4WU3_PIN == pin) {
+    intNo = 3;
+#endif
+#if defined(GPIO_EM4WU4_PORT)
+  } else if (GPIO_EM4WU4_PORT == port && GPIO_EM4WU4_PIN == pin) {
+    intNo = 4;
+#endif
+#if defined(GPIO_EM4WU6_PORT)
+  } else if (GPIO_EM4WU6_PORT == port && GPIO_EM4WU6_PIN == pin) {
+    intNo = 6;
+#endif
+#if defined(GPIO_EM4WU7_PORT)
+  } else if (GPIO_EM4WU7_PORT == port && GPIO_EM4WU7_PIN == pin) {
+    intNo = 7;
+#endif
+#if defined(GPIO_EM4WU8_PORT)
+  } else if (GPIO_EM4WU8_PORT == port && GPIO_EM4WU8_PIN == pin) {
+    intNo = 8;
+#endif
+#if defined(GPIO_EM4WU9_PORT)
+  } else if (GPIO_EM4WU9_PORT == port && GPIO_EM4WU9_PIN == pin) {
+    intNo = 9;
+#endif
+#if defined(GPIO_EM4WU10_PORT)
+  } else if (GPIO_EM4WU10_PORT == port && GPIO_EM4WU10_PIN == pin) {
+    intNo = 10;
+#endif
+  }
+
+  if (intNo != INTERRUPT_UNAVAILABLE) {
+#if defined(_GPIO_IEN_EM4WUIEN_SHIFT)
+    gpioCallbacks[_GPIO_IEN_EM4WUIEN_SHIFT + intNo].callback = (void *)callbackPtr;
+    gpioCallbacks[_GPIO_IEN_EM4WUIEN_SHIFT + intNo].context = callbackCtx;
+    gpioCallbacks[_GPIO_IEN_EM4WUIEN_SHIFT + intNo].context_flag = true;
+#else
+    gpioCallbacks[_GPIO_IEN_EM4WUIEN0_SHIFT + intNo].callback = (void *)callbackPtr;
+    gpioCallbacks[_GPIO_IEN_EM4WUIEN0_SHIFT + intNo].context = callbackCtx;
+    gpioCallbacks[_GPIO_IEN_EM4WUIEN0_SHIFT + intNo].context_flag = true;
+#endif
+  }
+
+  CORE_EXIT_ATOMIC();
+
+  return intNo;
+}
+#endif
 
 /***************************************************************************//**
  * @brief

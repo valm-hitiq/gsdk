@@ -133,6 +133,20 @@ void halHostSerialPowerup(void)
                   BSP_SPINCP_NWAKE_PIN,
                   gpioModeInputPullFilter,
                   1);
+  #if defined(_SILICON_LABS_32B_SERIES_2)
+  uint32_t interrupt;
+  interrupt = GPIOINT_EM4WUCallbackRegisterExt(BSP_SPINCP_NWAKE_PORT,
+                                               BSP_SPINCP_NWAKE_PIN,
+                                               NULL,
+                                               NULL);
+  if (interrupt != INTERRUPT_UNAVAILABLE) {
+    GPIO_EM4WUExtIntConfig(BSP_SPINCP_NWAKE_PORT,
+                           BSP_SPINCP_NWAKE_PIN,
+                           interrupt,
+                           false,
+                           true);
+  }
+  #endif // defined(_SILICON_LABS_32B_SERIES_2)
   GPIO_ExtIntConfig(BSP_SPINCP_NWAKE_PORT,
                     BSP_SPINCP_NWAKE_PIN,
                     BSP_SPINCP_NWAKE_PIN,

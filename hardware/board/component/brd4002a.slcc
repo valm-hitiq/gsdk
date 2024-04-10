@@ -11,10 +11,14 @@
   - name: hardware_board_mainboard_wstk
   - name: hardware_board_mainboard
   - name: hardware_board_from_wmb
-  - name: hardware_board_from_slwmb4002a
 - recommends: []
 - template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4002A"'
+  - name: SL_BOARD_REV
+    value: '"A06"'
 - tag:
   - board:pn:BRD4002
   - board:variant:A
-  - board:revision:A02
+  - board:revision:A06

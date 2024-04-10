@@ -16,12 +16,7 @@
  ******************************************************************************/
 #include "reporting-config.h"
 
-#if (EMBER_AF_PLUGIN_REPORTING_ENABLE_EXPANDED_TABLE == 1)
-#define EXPANDED_TABLE
-#endif
-
-#ifdef EXPANDED_TABLE
-#else
+#if (EMBER_AF_PLUGIN_REPORTING_ENABLE_EXPANDED_TABLE == 0)
 #define CREATOR_REPORT_TABLE  (0x8725)
 // This key is used for an indexed token and the subsequent 0x7F keys are also reserved
 #define NVM3KEY_REPORT_TABLE (NVM3KEY_DOMAIN_ZIGBEE | 0x4000)
@@ -49,4 +44,4 @@ DEFINE_INDEXED_TOKEN(REPORT_TABLE,
                        EMBER_AF_PLUGIN_REPORTING_UNUSED_ENDPOINT_ID })
 
 #endif //DEFINETOKENS
-#endif //EXPANDED_TABLE
+#endif //(EMBER_AF_PLUGIN_REPORTING_ENABLE_EXPANDED_TABLE == 0)

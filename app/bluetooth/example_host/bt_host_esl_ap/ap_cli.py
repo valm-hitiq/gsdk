@@ -642,6 +642,9 @@ class CliProcessor(cmd.Cmd):
 
                   image_update 1 "/user/home/path with space/img.jpg" all
                   Use the 'all' keyword as special address to send the same image to slot 1 on all connected ESLs.
+
+                  image_update 0 *qrcode all
+                  To send unique QR codes to all connected tags for use with ESL Demo, enter "*qrcode" instead of a valid image file path.
                   ''')
         parser_image_update.add_argument('image_index', type=int, help="Image storage index of the ESL tag to be updated.")
         parser_image_update.add_argument('imagefile_path', type=str, help="Relative or full path to the selected image file. Use quotation marks if the path contains spaces.")
@@ -666,13 +669,15 @@ class CliProcessor(cmd.Cmd):
         label = None
         rotation = None
         cropfit = False
+        filename = None
 
         if arg.image_index in range(0,256):
             image_index = arg.image_index
         else:
             self.log.error("Image index must be between 0 and 255")
             input_error = True
-        filename = arg.imagefile_path
+        if arg.imagefile_path != "*qrcode": # Check if this is not the specific use case for the ESL demo
+            filename = arg.imagefile_path
         if arg.raw:
             raw_img = True
         if arg.display_index is not None:

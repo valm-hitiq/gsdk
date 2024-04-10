@@ -25,4 +25,4 @@ template_contribution:
       event: stack_init
       include: sl_rail_util_power_manager_init.h
       handler: sl_rail_util_power_manager_init
-    priority: 9999
+    priority: -9010

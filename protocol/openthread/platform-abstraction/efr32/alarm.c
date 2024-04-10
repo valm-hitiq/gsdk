@@ -176,8 +176,8 @@ void otPlatAlarmMilliStartAt(otInstance *aInstance, uint32_t aT0, uint32_t aDt)
 
     sl_sleeptimer_stop_timer(&sl_handle);
 
-    sMsAlarm     = aT0 + aDt;
-    remaining    = (int64_t)(sMsAlarm - otPlatAlarmMilliGetNow());
+    sMsAlarm     = (uint64_t) aT0 + (uint64_t) aDt;
+    remaining    = (int64_t) sMsAlarm - (int64_t) otPlatAlarmMilliGetNow();
     sIsMsRunning = true;
 
     if (remaining <= 0)
@@ -225,7 +225,7 @@ uint64_t efr32AlarmPendingTime(void)
     uint32_t now       = otPlatAlarmMilliGetNow();
     if (sIsMsRunning && (sMsAlarm > now))
     {
-        remaining = sMsAlarm - now;
+        remaining = sMsAlarm - (uint64_t) now;
     }
     return remaining;
 }
@@ -256,7 +256,7 @@ void efr32AlarmProcess(otInstance *aInstance)
 
     if (sIsMsRunning)
     {
-        remaining = (int64_t)(sMsAlarm - otPlatAlarmMilliGetNow());
+        remaining = (int64_t) sMsAlarm - (int64_t) otPlatAlarmMilliGetNow();
         if (remaining <= 0)
         {
             otPlatAlarmMilliStop(aInstance);
@@ -267,7 +267,7 @@ void efr32AlarmProcess(otInstance *aInstance)
 #if OPENTHREAD_CONFIG_PLATFORM_USEC_TIMER_ENABLE
     if (sIsUsRunning)
     {
-        remaining = (int64_t)(sUsAlarm - otPlatAlarmMicroGetNow());
+        remaining = (int64_t) sUsAlarm - (int64_t) otPlatAlarmMicroGetNow();
         if (remaining <= 0)
         {
             otPlatAlarmMicroStop(aInstance);
@@ -335,8 +335,8 @@ void otPlatAlarmMicroStartAt(otInstance *aInstance, uint32_t aT0, uint32_t aDt)
 
     RAIL_CancelMultiTimer(&rail_timer);
 
-    sUsAlarm     = aT0 + aDt;
-    remaining    = (int64_t)(sUsAlarm - otPlatAlarmMicroGetNow());
+    sUsAlarm     = (uint64_t) aT0 + (uint64_t) aDt;
+    remaining    = (int64_t) sUsAlarm - (int64_t) otPlatAlarmMicroGetNow();
     sIsUsRunning = true;
 
     if (remaining <= 0)

@@ -954,6 +954,8 @@ sl_status_t abr_file_log_store_step(abr_role_t role, cs_step_t *step_data)
   return sc;
 }
 
+// -----------------------------------------------------------------------------
+// Private function definitions
 static void replace_char(char *str, char target_char, char new_char)
 {
   for (int i = 0; str[i] != '\0'; i++) {

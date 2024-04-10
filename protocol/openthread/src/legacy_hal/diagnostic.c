@@ -16,6 +16,8 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
+/* clang-format off */
+
 #include PLATFORM_HEADER
 
 #include <stdint.h>
@@ -26,7 +28,7 @@
 #include "em_emu.h"
 #include "em_rmu.h"
 
-#include "logging.h"
+#include <openthread/logging.h>
 
 // Crash info live in noinit RAM segment that is not modified during startup.
 NO_INIT(HalCrashInfoType halCrashInfo);

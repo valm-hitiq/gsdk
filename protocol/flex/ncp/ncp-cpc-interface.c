@@ -17,7 +17,7 @@
 #include "sli_cpc.h"
 #include "sl_cpc.h"
 #include <time.h>
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include "stack/include/ember.h"
 #include "ncp-cpc-interface.h"
 #include "csp-format.h"
@@ -57,7 +57,7 @@ static void on_write_completed(sl_cpc_user_endpoint_id_t endpoint_id, void *buff
 void sli_connect_ncp_process_incoming_api_command(uint8_t *apiCommandData)
 {
   // This API must be called from the stack task.
-  assert(isCurrentTaskStackTask());
+  CONNECT_STACK_ASSERT(isCurrentTaskStackTask());
   uint16_t commandId = emberFetchHighLowInt16u(apiCommandData);
 
   handleIncomingApiCommand(commandId, apiCommandData);
@@ -94,7 +94,7 @@ static void cpc_error_cb(uint8_t endpoint_id, void *arg)
   uint8_t state = sl_cpc_get_endpoint_state(&connect_endpoint_handle);
   if (state == SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE) {
     sl_status_t status = sl_cpc_close_endpoint(&connect_endpoint_handle);
-    assert(status == SL_STATUS_OK);
+    CONNECT_STACK_ASSERT(status == SL_STATUS_OK);
     connected = false;
     emberEventControlSetActive(sl_connect_ncp_endpoint_deconnection_event);
   }
@@ -184,6 +184,6 @@ bool connect_cpc_open_endpoint(void)
 
 void connect_stack_cpc_init(void)
 {
-  assert(connect_cpc_open_endpoint());
+  CONNECT_STACK_ASSERT(connect_cpc_open_endpoint());
   emberNcpSetLongMessagesUse(false);
 }

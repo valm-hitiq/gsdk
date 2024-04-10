@@ -27,7 +27,7 @@
  *
  ******************************************************************************/
 
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include "cmsis-rtos-ipc-config.h"
 
 #include "stack/include/ember.h"
@@ -67,8 +67,9 @@ void emAfPluginCmsisRtosAppFrameworkTask(void *p_arg)
 
 void emAfPluginCmsisRtosWakeUpAppFrameworkTask(void)
 {
-  assert((osEventFlagsSet(emAfPluginCmsisRtosFlags,
-                          FLAG_STACK_CALLBACK_PENDING) & CMSIS_RTOS_ERROR_MASK) == 0);
+  CONNECT_STACK_ASSERT((osEventFlagsSet(emAfPluginCmsisRtosFlags,
+                                        FLAG_STACK_CALLBACK_PENDING)
+                        & CMSIS_RTOS_ERROR_MASK) == 0);
 }
 
 //------------------------------------------------------------------------------
@@ -77,7 +78,7 @@ void emAfPluginCmsisRtosWakeUpAppFrameworkTask(void)
 static void appFrameworkTaskYield(void)
 {
   uint32_t idleTimeMs = emberMsToNextEvent(emAppEvents,
-                                           EMBER_AF_PLUGIN_CMSIS_RTOS_APP_FRAMEWORK_YIELD_TIMEOUT_MS);
+                                           CMSIS_RTOS_APP_FRAMEWORK_YIELD_TIMEOUT_MS);
 
   if (idleTimeMs > 0) {
     uint32_t yieldTimeTicks = (osKernelGetTickFreq() * idleTimeMs) / 1000;

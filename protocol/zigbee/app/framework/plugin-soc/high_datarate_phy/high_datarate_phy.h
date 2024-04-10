@@ -25,12 +25,12 @@
 #include "sl_cli.h"
 
 /**
- * Transmits a High-BW-Phy packet consisting of <len-1> bytes of payload
+ * Transmits a High-BW-Phy packet consisting of <len> bytes of payload
  * Note that there is a 4 byte CRC which is tacked on later and is not part
  * of the packet parameter
  * @param[in] payload Pointer to bytes of transmitted data
  *                packet[0] packet[1] : 2 byte Length (packet[1] << 8 + packet[0])
- *                packet[2] .. packet[Length] payload
+ *                packet[2] .. packet[Length+1] payload
  *
  * CAUTION: Do not call this function from any other RTOS task context except Zigbee
  * This calls into a function that manipulates buffers and will cause unpredictable errors if this rule is not
@@ -58,7 +58,7 @@ RAIL_Status_t sl_high_datarate_phy_set_reception_enable (bool enable_f);
  * Note that packet does not include 4 byte CRC.
  *  @param[in] Function pointer to receive callback
  *              packet[0] packet[1] : 2 byte Length (packet[1] << 8 + packet[0])
- *              packet[1] .. packet[Length] payload
+ *              packet[2] .. packet[Length+1] payload
  *              linkQuality of received packet
  *              rssi of received packet
  *
@@ -85,7 +85,7 @@ void sl_high_datarate_phy_config_radio_priorities(EmberMultiprotocolPriorities *
 /**
  * Default receive callback function for High-BW-phy packets
  *              packet[0] packet[1] : 2 byte Length (packet[1] << 8 + packet[0])
- *              packet[1] .. packet[Length] payload
+ *              packet[2] .. packet[Length+1] payload
  *              linkQuality of received packet
  *              rssi of received packet
  *

@@ -3,7 +3,7 @@
  * @brief Wake and sleep functionality
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,6 +31,7 @@
 #define CURRENT_MODULE_NAME    "APP_BLUETOOTH_EXAMPLE_WAKE_LOCK"
 
 #include "em_gpio.h"
+#include "sl_common.h"
 #include "gpiointerrupt.h"
 #include "sl_wake_lock.h"
 #include "sl_power_manager.h"

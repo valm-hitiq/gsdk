@@ -28,7 +28,7 @@
 // to the halfway point in the list.  This would cut the lookup time
 // almost in half without adding much complexity.
 
-#include <assert.h>
+#include "core/sl-connect-assert.h"
 #include "stack/include/ember.h"
 #include "core/sli-connect-api.h"
 #include "stack/core/sli-connect-interrupt-manipulation.h"
@@ -48,7 +48,7 @@ void emIsrEventMarker(struct Event_s *event)
 {
   (void)event;
 
-  assert(false);
+  CONNECT_STACK_ASSERT(false);
 }
 
 void emInitializeEventQueue(EventQueue *queue)
@@ -146,7 +146,7 @@ static void adjustListLocation(EventQueue *queue, Event *event, bool keep)
   Event *previous = (Event *) queue;
   Event *finger = queue->events;
   Event *newLocation = NULL;
-  assert(event->next != event);
+  CONNECT_STACK_ASSERT(event->next != event);
 
   // Find 'event' in the list, noting the new location if we come across it.
   while (finger != event) {
@@ -172,7 +172,7 @@ static void adjustListLocation(EventQueue *queue, Event *event, bool keep)
     if (newLocation == NULL) {
       newLocation = previous;
       finger = event->next;
-      assert(event->next != event);
+      CONNECT_STACK_ASSERT(event->next != event);
       while (finger != LIST_END
              && timeGTorEqualInt32u(event->timeToExecute,
                                     finger->timeToExecute)) {
@@ -257,7 +257,7 @@ void emberEventSetDelayMs(Event *event, uint32_t delay)
 {
   EventQueue *queue = event->actions->queue;
   if (event->actions->marker == emIsrEventMarker) {
-    assert(delay == 0);
+    CONNECT_STACK_ASSERT(delay == 0);
     CORE_ATOMIC_SECTION(
       if (event->next != NULL) {
       // already scheduled, do nothing

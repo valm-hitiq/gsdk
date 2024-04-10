@@ -1,0 +1,23 @@
+!!omap
+- id: slwstk6050c
+- label: SLWSTK6050C
+- package: platform
+- description: Kit BSP support for the Z-Wave 700 Starter Kit.
+- category: Platform|Board|Kit|Wireless Starter Kit
+- quality: production
+- requires:
+  - name: brd4002a
+  - name: hardware_board_from_slwstk6050c
+- provides:
+  - name: hardware_kit
+  - name: hardware_kit_stk
+- define:
+  - name: SL_KIT_NAME
+    value: '"SLWSTK6050C"'
+  - name: SL_KIT_REV
+    value: '"A00"'
+- tag:
+  - kit:opn:SLWSTK6050C
+  - kit:pn:WSTK6050
+  - kit:variant:C
+  - kit:revision:A00

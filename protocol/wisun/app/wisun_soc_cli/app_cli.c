@@ -771,6 +771,15 @@ static void app_handle_lfn_multicast_reg_ind(sl_wisun_evt_t *evt)
   }
 }
 
+static void app_handle_dhcp_vendor_data_ind(sl_wisun_evt_t *evt)
+{
+  printf("[Vendor data received: Enterprise Number %"PRIu32"]\r\nPayload: ", evt->evt.dhcp_vendor_data.enterprise_number);
+  for (uint8_t i = 0; i < evt->evt.dhcp_vendor_data.data_length; i++) {
+    printf("%02x ", evt->evt.dhcp_vendor_data.data[i]);
+  }
+  printf("\r\n");
+}
+
 void sl_wisun_on_event(sl_wisun_evt_t *evt)
 {
   sl_status_t result;
@@ -824,6 +833,9 @@ void sl_wisun_on_event(sl_wisun_evt_t *evt)
       break;
     case SL_WISUN_MSG_LFN_MULTICAST_REG_IND_ID:
       app_handle_lfn_multicast_reg_ind(evt);
+      break;
+    case SL_WISUN_MSG_DHCP_VENDOR_DATA_IND_ID:
+      app_handle_dhcp_vendor_data_ind(evt);
       break;
     default:
       printf("[Unknown event: %d]\r\n", evt->header.id);

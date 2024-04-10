@@ -35,7 +35,6 @@ requires:
       - device_sdid_200
 recommends:
   - id: ot_stack_rcp
-  - id: ot_coex
 include:
   - path: util/third_party/openthread/src/
     file_list:

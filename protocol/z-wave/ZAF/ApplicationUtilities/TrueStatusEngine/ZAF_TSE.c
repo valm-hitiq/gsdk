@@ -190,42 +190,6 @@ bool ZAF_TSE_Trigger(zaf_tse_callback_t pCallback,
   return true;
 }
 
-/**
- * Checks whether Multi Channel encapsulation should be applied to an outgoing
- * status report.
- *
- * @param[in] source_endpoint The Endpoint whence the state change originates
- * @param[in] destination_node_id The ID of the Node that needs to be notified
- */
-static inline bool
-ShouldUseMultiChannelEncapsulation(uint8_t source_endpoint,
-                                   uint16_t destination_node_id)
-{
-  // The Root Endpoint does not need Multi Channel encapsulation
-  if (source_endpoint == 0) {
-    return false;
-  }
-
-  /**
-   * CC:008E.02.00.21.008, CC:008E.03.00.11.001, CC:008E.03.00.21.002:
-   * A Root Device must not use Multi Channel encapsulation when
-   * communicating to another Root Device.
-   *
-   * Find the relevant association based on the destination Node ID and include
-   * the source Endpoint in the outgoing frame only if this is a Multi Channel
-   * Association.
-   */
-  MULTICHAN_NODE_ID* pList = NULL;
-  uint8_t ListLen = 0;
-  handleAssociationGetnodeList(ZAF_TSE_GROUP_ID, 0, &pList, &ListLen);
-  for (uint8_t i = 0; i < ListLen; ++i) {
-    if (pList[i].node.nodeId == destination_node_id) {
-      return pList[i].nodeInfo.BitMultiChannelEncap;
-    }
-  }
-  return false;
-}
-
 static void InvokeRegisteredCallback(void)
 {
   DPRINTF("\r\n%s():", __func__);
@@ -236,6 +200,18 @@ static void InvokeRegisteredCallback(void)
   DPRINTF("\tTSE transmit call back for dest node %d endpoint %d\r\n",
           pCurrentTrigger->pCurrentNode->node.nodeId, pCurrentTrigger->pCurrentNode->node.endpoint);
 
+  /**
+   * CC:008E.02.00.21.008, CC:008E.03.00.11.001, CC:008E.03.00.21.002:
+   * A Root Device must not use Multi Channel encapsulation when
+   * communicating to another Root Device.
+   *
+   * Set the Source Endpoint only if the Association is Multi Channel, to avoid
+   * incorrectly applying encapsulation for "plain" Associations later.
+   */
+  const uint8_t source_endpoint =
+    pCurrentTrigger->pCurrentNode->nodeInfo.BitMultiChannelEncap == 1
+    ? RxOptions.destNode.endpoint : 0;
+
   /* Build a txOptionEx */
   zaf_tx_options_t tx_options;
 
@@ -243,9 +219,7 @@ static void InvokeRegisteredCallback(void)
   tx_options.dest_endpoint = pCurrentTrigger->pCurrentNode->node.endpoint;
   tx_options.bit_addressing = pCurrentTrigger->pCurrentNode->node.BitAddress;
   tx_options.security_key = pCurrentTrigger->pCurrentNode->nodeInfo.security;
-  tx_options.source_endpoint = ShouldUseMultiChannelEncapsulation(
-    RxOptions.destNode.endpoint, pCurrentTrigger->pCurrentNode->node.nodeId)
-    ? RxOptions.destNode.endpoint : 0;
+  tx_options.source_endpoint = source_endpoint;
   tx_options.tx_options = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_EXPLORE | ZWAVE_PLUS_TX_OPTIONS;
   if (RxOptions.rxStatus & RECEIVE_STATUS_LOW_POWER)
   {

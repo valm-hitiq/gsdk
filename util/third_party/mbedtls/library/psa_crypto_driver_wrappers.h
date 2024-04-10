@@ -273,6 +273,20 @@ static inline psa_status_t psa_driver_wrapper_sign_message(
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
 #endif
+#if defined(SLI_ECDSA_DEVICE_SI91X)
+            status = sli_si91x_crypto_sign_message( attributes,
+                                                    key_buffer,
+                                                    key_buffer_size,
+                                                    alg,
+                                                    input,
+                                                    input_length,
+                                                    signature,
+                                                    signature_size,
+                                                    signature_length);
+            /* Declared with fallback == true */
+            if( status != PSA_ERROR_NOT_SUPPORTED )
+                return( status );
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
             break;
 
@@ -308,6 +322,21 @@ static inline psa_status_t psa_driver_wrapper_sign_message(
             /* No fallback for opaque */
             return( status );
 #endif
+#if defined(SLI_ECDSA_DEVICE_SI91X)
+#if defined(SLI_SECURE_KEY_STORAGE_DEVICE_SI91X)
+        case PSA_KEY_VOLATILE_PERSISTENT_WRAPPED:
+            status = sli_si91x_crypto_sign_message( attributes,
+                                                    key_buffer,
+                                                    key_buffer_size,
+                                                    alg,
+                                                    input,
+                                                    input_length,
+                                                    signature,
+                                                    signature_size,
+                                                    signature_length);
+            return status;
+#endif
+#endif /* SLI_ECDSA_DEVICE_SI91X */
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
@@ -373,6 +402,19 @@ static inline psa_status_t psa_driver_wrapper_verify_message(
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
 #endif
+#if defined(SLI_ECDSA_DEVICE_SI91X)
+            status = sli_si91x_crypto_verify_message( attributes,
+                                                      key_buffer,
+                                                      key_buffer_size,
+                                                      alg,
+                                                      input,
+                                                      input_length,
+                                                      signature,
+                                                      signature_length);
+            /* Declared with fallback == true */
+            if( status != PSA_ERROR_NOT_SUPPORTED )
+                return( status );
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
             break;
 
@@ -403,7 +445,22 @@ static inline psa_status_t psa_driver_wrapper_verify_message(
             /* No fallback for opaque */
             return( status );
 #endif
+#if defined(SLI_ECDSA_DEVICE_SI91X)
+#if defined(SLI_SECURE_KEY_STORAGE_DEVICE_SI91X)
+        case PSA_KEY_VOLATILE_PERSISTENT_WRAPPED:
+          status = sli_si91x_crypto_verify_message( attributes,
+                                                    key_buffer,
+                                                    key_buffer_size,
+                                                    alg,
+                                                    input,
+                                                    input_length,
+                                                    signature,
+                                                    signature_length);
+            return status;
+#endif
+#endif /* SLI_ECDSA_DEVICE_SI91X */
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+
         default:
             /* Key is declared with a lifetime not known to us */
             (void)status;

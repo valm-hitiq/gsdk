@@ -12,6 +12,8 @@ requires:
   - name: psa_crypto_aes
   - name: mbedtls_cmac
     condition: [device_series_0]
+  - name: sl_si91x_psa_mac
+    condition: [device_si91x]
 template_contribution:
   - name: psa_crypto_config
     value: PSA_WANT_ALG_CMAC 1

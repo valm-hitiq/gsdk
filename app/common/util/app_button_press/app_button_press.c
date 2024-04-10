@@ -3,7 +3,7 @@
  * @brief Button Press source code
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 
+#include "sl_common.h"
 #include "sl_sleeptimer.h"
 #include "app_button_press.h"
 #include "app_button_press_config.h"

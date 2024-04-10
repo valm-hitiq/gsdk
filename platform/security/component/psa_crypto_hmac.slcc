@@ -14,8 +14,7 @@ requires:
     condition: [device_series_0]
   - name: mbedtls_hmac
     condition: [device_series_1]
-  - name: sl_si91x_psa_hmac
-    from: wiseconnect3_sdk
+  - name: sl_si91x_psa_mac
     condition: [device_si91x]
 template_contribution:
   - name: psa_crypto_config

@@ -72,7 +72,7 @@
 
 // $[GPIO_SL_VCOM_ENABLE]
 #define SL_VCOM_ENABLE_PORT                      gpioPortA
-#define SL_VCOM_ENABLE_PIN                       8
+#define SL_VCOM_ENABLE_PIN                       9
 
 // [GPIO_SL_VCOM_ENABLE]$
 

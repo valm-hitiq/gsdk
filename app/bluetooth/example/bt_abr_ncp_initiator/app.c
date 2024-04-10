@@ -44,6 +44,9 @@
 #define ANTENNA_PIN0                 0
 #define ANTENNA_PIN1                 1
 #define APPLY_ANTENNA_PIN(pin, value)  ((value) ? GPIO_PinOutSet(ANTENNA_PORT, pin) : GPIO_PinOutClear(ANTENNA_PORT, pin))
+#ifndef SL_BOARD_NAME
+#define SL_BOARD_NAME "UNKNOWN!"
+#endif // SL_BOARD_NAME
 
 static void ans_set_GPIOS_for_antenna(uint8_t);
 

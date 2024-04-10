@@ -17,7 +17,9 @@
 
 #include "app/framework/include/af.h"
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
-
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
 // TODO: this is to bring in sli_zigbee_af_permit_join() and emberAfGetBindingTableSize()
 // prototypes.
 #include "app/framework/util/af-main.h"
@@ -28,6 +30,10 @@
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
   #include "app/framework/plugin/zll-commissioning-common/zll-commissioning-common.h"
 #endif
+
+#ifdef SL_CATALOG_ZIGBEE_PHY_2_4_SUBGHZ_JOINING_END_DEVICE_PRESENT
+  #include "stack/include/stack-info.h"
+#endif // SL_CATALOG_ZIGBEE_PHY_2_4_SUBGHZ_JOINING_END_DEVICE_PRESENT
 
 uint8_t sli_zigbee_af_cli_network_index = EMBER_AF_DEFAULT_NETWORK_INDEX;
 extern uint8_t sli_zigbee_af_extended_pan_id[];
@@ -103,6 +109,15 @@ void networkRejoinCommand(sl_cli_command_arg_t *arguments)
   uint32_t channelMask = sl_cli_get_argument_uint32(arguments, 1);
   if (channelMask == 0) {
     channelMask = EMBER_ALL_802_15_4_CHANNELS_MASK;
+    // Allow the upper layer to update the rejoin mask incase needed in this callback.
+    // Why do we need this callback - in SE 1.4 CCB 2637 introduced a device type that is slightly
+    // different Multi-MAC Selection device called as the Multi-MAC Joining device.
+    // The Joining Device shall not change the interface during rejoin but the selection device can.
+    // Since this code is in library of the leaf node with the folloiwng callback it would be able
+    // update mask for rejoining based on the above device types.
+    #ifdef SL_CATALOG_ZIGBEE_PHY_2_4_SUBGHZ_JOINING_END_DEVICE_PRESENT
+    emberUpdateMultiMacRejoinChannelMaskForSelectionOrJoiningDevice(&channelMask);
+    #endif // SL_CATALOG_ZIGBEE_PHY_2_4_SUBGHZ_JOINING_END_DEVICE_PRESENT
   }
   EmberStatus status = emberFindAndRejoinNetworkWithReason(haveCurrentNetworkKey,
                                                            channelMask,
@@ -206,7 +221,7 @@ void networkMultiPhyStartCommand(sl_cli_command_arg_t *arguments)
   int8_t power = sl_cli_get_argument_int8(arguments, 2);
   uint8_t optionsMask = 0;
 
-  if (sl_cli_get_command_count(arguments) > 3) {
+  if (sl_cli_get_argument_count(arguments) > 3) {
     optionsMask = sl_cli_get_argument_uint8(arguments, 3);
   }
 

@@ -154,6 +154,10 @@ extern "C" {
 #define sl_btmesh_cmd_node_set_oob_uri_id                                0x33140028
 #define sl_btmesh_cmd_node_get_oob_uri_id                                0x34140028
 #define sl_btmesh_cmd_node_set_proxy_service_uuid_id                     0x35140028
+#define sl_btmesh_cmd_node_set_proxy_service_scan_response_id            0x37140028
+#define sl_btmesh_cmd_node_clear_proxy_service_scan_response_id          0x38140028
+#define sl_btmesh_cmd_node_set_provisioning_service_scan_response_id     0x39140028
+#define sl_btmesh_cmd_node_clear_provisioning_service_scan_response_id   0x3a140028
 #define sl_btmesh_rsp_node_init_id                                       0x00140028
 #define sl_btmesh_rsp_node_set_exportable_keys_id                        0x24140028
 #define sl_btmesh_rsp_node_start_unprov_beaconing_id                     0x01140028
@@ -198,6 +202,10 @@ extern "C" {
 #define sl_btmesh_rsp_node_set_oob_uri_id                                0x33140028
 #define sl_btmesh_rsp_node_get_oob_uri_id                                0x34140028
 #define sl_btmesh_rsp_node_set_proxy_service_uuid_id                     0x35140028
+#define sl_btmesh_rsp_node_set_proxy_service_scan_response_id            0x37140028
+#define sl_btmesh_rsp_node_clear_proxy_service_scan_response_id          0x38140028
+#define sl_btmesh_rsp_node_set_provisioning_service_scan_response_id     0x39140028
+#define sl_btmesh_rsp_node_clear_provisioning_service_scan_response_id   0x3a140028
 
 /**
  * @brief Flags for allowed provisioning algorithms during provisioning, which
@@ -1866,6 +1874,87 @@ sl_status_t sl_btmesh_node_get_oob_uri(size_t max_uri_size,
  * @endcond
  ******************************************************************************/
 sl_status_t sl_btmesh_node_set_proxy_service_uuid(uint16_t uuid);
+
+/***************************************************************************//**
+ *
+ * Set Mesh Proxy Service scan response data.
+ *
+ * This command sets the scan response data for a Mesh Proxy Service
+ * advertisement. The Mesh Proxy Service advertisement is a connectable and
+ * scannable advertisement, meaning that a client can issue a scan request and
+ * receive a scan response that carries additional data relevant to the service.
+ * This setting will take effect next time the Mesh Proxy Service advertisement
+ * is started.
+ *
+ * @param[in] netkey_index Index of the network key associated with the proxy
+ *   service advertisement. The caller may set scan response data separately for
+ *   each network key, so that data encrypted and/or authenticated with the
+ *   network key can be used as a scan response, if desired.
+ * @param[in] scan_response_data_len Length of data in @p scan_response_data
+ * @param[in] scan_response_data Binary scan response data encoded as AD types
+ *   as defined in the Core specification. Data must fit into a SCAN_RSP PDU. It
+ *   is up to the caller to ensure that valid data is given.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_node_set_proxy_service_scan_response(uint16_t netkey_index,
+                                                           size_t scan_response_data_len,
+                                                           const uint8_t* scan_response_data);
+
+/***************************************************************************//**
+ *
+ * Clear Mesh Proxy Service scan response data.
+ *
+ * This command clears the scan response data for a Mesh Proxy Service
+ * advertisement. This setting will take effect next time the Mesh Proxy Service
+ * advertisement is started.
+ *
+ * @param[in] netkey_index Index of the network key associated with the proxy
+ *   service advertisement. The caller may set scan response data separately for
+ *   each network key, so that data encrypted and/or authenticated with the
+ *   network key can be used as a scan response, if desired.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_node_clear_proxy_service_scan_response(uint16_t netkey_index);
+
+/***************************************************************************//**
+ *
+ * Set Mesh Provisioning Service scan response data.
+ *
+ * This command sets the scan response data for a Mesh Provisioning Service
+ * advertisement. The Mesh Provisioning Service advertisement is a connectable
+ * and scannable advertisement, meaning that a client can issue a scan request
+ * and receive a scan response that carries additional data relevant to the
+ * service. This setting will take effect next time the Mesh Provisioning
+ * Service advertisement is started.
+ *
+ * @param[in] scan_response_data_len Length of data in @p scan_response_data
+ * @param[in] scan_response_data Binary scan response data encoded as AD types
+ *   as defined in the Core specification. Data must fit into a SCAN_RSP PDU. It
+ *   is up to the caller to ensure that valid data is given.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_node_set_provisioning_service_scan_response(size_t scan_response_data_len,
+                                                                  const uint8_t* scan_response_data);
+
+/***************************************************************************//**
+ *
+ * Clear Mesh Provisioning Service scan response data.
+ *
+ * This command clears the scan response data for a Mesh Provisioning Service
+ * advertisement. This setting will take effect next time the Mesh Provisioning
+ * Service advertisement is started.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_node_clear_provisioning_service_scan_response();
 
 /** @} */ // end addtogroup sl_btmesh_node
 
@@ -3958,6 +4047,7 @@ sl_status_t sl_btmesh_silabs_config_client_deinit();
 #define sl_btmesh_cmd_vendor_model_deinit_id                             0x05190028
 #define sl_btmesh_cmd_vendor_model_send_tracked_id                       0x06190028
 #define sl_btmesh_cmd_vendor_model_set_publication_tracked_id            0x07190028
+#define sl_btmesh_cmd_vendor_model_set_option_id                         0x08190028
 #define sl_btmesh_rsp_vendor_model_send_id                               0x00190028
 #define sl_btmesh_rsp_vendor_model_set_publication_id                    0x01190028
 #define sl_btmesh_rsp_vendor_model_clear_publication_id                  0x02190028
@@ -3966,6 +4056,24 @@ sl_status_t sl_btmesh_silabs_config_client_deinit();
 #define sl_btmesh_rsp_vendor_model_deinit_id                             0x05190028
 #define sl_btmesh_rsp_vendor_model_send_tracked_id                       0x06190028
 #define sl_btmesh_rsp_vendor_model_set_publication_tracked_id            0x07190028
+#define sl_btmesh_rsp_vendor_model_set_option_id                         0x08190028
+
+/**
+ * @brief Key values to identify vendor model configuration options
+ */
+typedef enum
+{
+  sl_btmesh_vendor_model_heap_work_buffer = 0x0  /**< (0x0) If set to 1, each
+                                                      vendor model allocates a
+                                                      heap work buffer for
+                                                      messages being received.
+                                                      If set to 0, no heap work
+                                                      buffer allocation is made,
+                                                      which saves memory but
+                                                      risks losing messages in a
+                                                      high load environment.
+                                                      Range: 0...1 Default: 1 */
+} sl_btmesh_vendor_model_options_t;
 
 /**
  * @addtogroup sl_btmesh_evt_vendor_model_receive sl_btmesh_evt_vendor_model_receive
@@ -4323,6 +4431,23 @@ sl_status_t sl_btmesh_vendor_model_set_publication_tracked(uint16_t elem_index,
                                                            size_t payload_len,
                                                            const uint8_t* payload,
                                                            uint16_t *handle);
+
+/***************************************************************************//**
+ *
+ * Set global vendor model configuration options.
+ *
+ * This command sets global configuration options for all vendor models. Options
+ * take effect when models are initialized, so this command should be called
+ * before any @ref sl_btmesh_vendor_model_init call.
+ *
+ * @param[in] option Enum @ref sl_btmesh_vendor_model_options_t. Configuration
+ *   option.
+ * @param[in] value Configuration value
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_vendor_model_set_option(uint8_t option, uint32_t value);
 
 /** @} */ // end addtogroup sl_btmesh_vendor_model
 
@@ -22183,6 +22308,9 @@ sl_status_t sl_btmesh_silabs_config_server_get_network_pdu(uint16_t *max_size);
 #define sl_btmesh_cmd_diagnostic_get_relay_id                            0x046c0028
 #define sl_btmesh_cmd_diagnostic_get_statistics_id                       0x056c0028
 #define sl_btmesh_cmd_diagnostic_clear_statistics_id                     0x066c0028
+#define sl_btmesh_cmd_diagnostic_enable_friend_id                        0x076c0028
+#define sl_btmesh_cmd_diagnostic_disable_friend_id                       0x086c0028
+#define sl_btmesh_cmd_diagnostic_get_friend_id                           0x096c0028
 #define sl_btmesh_rsp_diagnostic_init_id                                 0x006c0028
 #define sl_btmesh_rsp_diagnostic_deinit_id                               0x016c0028
 #define sl_btmesh_rsp_diagnostic_enable_relay_id                         0x026c0028
@@ -22190,6 +22318,9 @@ sl_status_t sl_btmesh_silabs_config_server_get_network_pdu(uint16_t *max_size);
 #define sl_btmesh_rsp_diagnostic_get_relay_id                            0x046c0028
 #define sl_btmesh_rsp_diagnostic_get_statistics_id                       0x056c0028
 #define sl_btmesh_rsp_diagnostic_clear_statistics_id                     0x066c0028
+#define sl_btmesh_rsp_diagnostic_enable_friend_id                        0x076c0028
+#define sl_btmesh_rsp_diagnostic_disable_friend_id                       0x086c0028
+#define sl_btmesh_rsp_diagnostic_get_friend_id                           0x096c0028
 
 /**
  * @addtogroup sl_btmesh_evt_diagnostic_relay sl_btmesh_evt_diagnostic_relay
@@ -22216,6 +22347,95 @@ PACKSTRUCT( struct sl_btmesh_evt_diagnostic_relay_s
 typedef struct sl_btmesh_evt_diagnostic_relay_s sl_btmesh_evt_diagnostic_relay_t;
 
 /** @} */ // end addtogroup sl_btmesh_evt_diagnostic_relay
+
+/**
+ * @addtogroup sl_btmesh_evt_diagnostic_friend_queue sl_btmesh_evt_diagnostic_friend_queue
+ * @{
+ * @brief Event for LPN message queuing
+ */
+
+/** @brief Identifier of the friend_queue event */
+#define sl_btmesh_evt_diagnostic_friend_queue_id                         0x016c00a8
+
+/***************************************************************************//**
+ * @brief Data structure of the friend_queue event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_diagnostic_friend_queue_s
+{
+  uint16_t netkey_index; /**< Index of the network key used in friendship */
+  uint16_t lpn;          /**< LPN address */
+  uint16_t src;          /**< Source address of the message */
+  uint16_t dst;          /**< Destination address of the message */
+  uint32_t ivi;          /**< IV index used to secure the message */
+  uint32_t seq;          /**< Sequence number of the message */
+});
+
+typedef struct sl_btmesh_evt_diagnostic_friend_queue_s sl_btmesh_evt_diagnostic_friend_queue_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_diagnostic_friend_queue
+
+/**
+ * @addtogroup sl_btmesh_evt_diagnostic_friend_relay sl_btmesh_evt_diagnostic_friend_relay
+ * @{
+ * @brief Event for LPN message relaying as a response to a poll request from
+ * the LPN
+ */
+
+/** @brief Identifier of the friend_relay event */
+#define sl_btmesh_evt_diagnostic_friend_relay_id                         0x026c00a8
+
+/***************************************************************************//**
+ * @brief Data structure of the friend_relay event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_diagnostic_friend_relay_s
+{
+  uint16_t netkey_index; /**< Index of the network key used in friendship */
+  uint16_t lpn;          /**< LPN address */
+  uint16_t src;          /**< Source address of the message */
+  uint16_t dst;          /**< Destination address of the message */
+  uint32_t ivi;          /**< IV index used to secure the message */
+  uint32_t seq;          /**< Sequence number of the message */
+});
+
+typedef struct sl_btmesh_evt_diagnostic_friend_relay_s sl_btmesh_evt_diagnostic_friend_relay_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_diagnostic_friend_relay
+
+/**
+ * @addtogroup sl_btmesh_evt_diagnostic_friend_remove sl_btmesh_evt_diagnostic_friend_remove
+ * @{
+ * @brief Event for removing a message from friendship queue
+ */
+
+/** @brief Identifier of the friend_remove event */
+#define sl_btmesh_evt_diagnostic_friend_remove_id                        0x036c00a8
+
+/***************************************************************************//**
+ * @brief Data structure of the friend_remove event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_diagnostic_friend_remove_s
+{
+  uint16_t netkey_index; /**< Index of the network key used in friendship */
+  uint16_t lpn;          /**< LPN address */
+  uint16_t src;          /**< Source address of the message */
+  uint16_t dst;          /**< Destination address of the message */
+  uint32_t ivi;          /**< IV index used to secure the message */
+  uint32_t seq;          /**< Sequence number of the message */
+  uint8_t  reason;       /**< Reason for removing the message. The following
+                              reasons are defined:
+                                - 0: The message has been acknowledged as
+                                  delivered by the LPN
+                                - 1: The message queue has overflowed and the
+                                  oldest message was dropped
+                                - 2: A newer segment acknowledgement has been
+                                  inserted to the message queue
+                                - 3: Invalidated message segments have been
+                                  cleaned up */
+});
+
+typedef struct sl_btmesh_evt_diagnostic_friend_remove_s sl_btmesh_evt_diagnostic_friend_remove_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_diagnostic_friend_remove
 
 /***************************************************************************//**
  *
@@ -22277,8 +22497,17 @@ sl_status_t sl_btmesh_diagnostic_get_relay(uint32_t *relay_counter);
 
 /***************************************************************************//**
  *
- * Get Bluetooth mesh stack statistics data counters.
+ * Get a chunk of Bluetooth mesh stack statistics data counters. As there can be
+ * a large amount of statistics, it has to be retrieved as chunks. The
+ * application is free to specify the size of the chunk it wants to use, but
+ * keep in mind that for the NCP use case there may be limited size buffers in
+ * the underlying serial channel.
  *
+ * @param[in] requested_chunk Size of the statistics data chunk requested
+ * @param[in] requested_offset Byte offset to the statistics data chunk
+ *   requested
+ * @param[out] total_length Total length of the statistics data in the system
+ * @param[out] chunk_offset Byte offset to the statistics data chunk delivered
  * @param[in] max_statistics_size Size of output buffer passed in @p statistics
  * @param[out] statistics_len On return, set to the length of output data
  *   written to @p statistics
@@ -22287,7 +22516,11 @@ sl_status_t sl_btmesh_diagnostic_get_relay(uint32_t *relay_counter);
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_btmesh_diagnostic_get_statistics(size_t max_statistics_size,
+sl_status_t sl_btmesh_diagnostic_get_statistics(uint32_t requested_chunk,
+                                                uint32_t requested_offset,
+                                                uint32_t *total_length,
+                                                uint32_t *chunk_offset,
+                                                size_t max_statistics_size,
                                                 size_t *statistics_len,
                                                 uint8_t *statistics);
 
@@ -22300,6 +22533,62 @@ sl_status_t sl_btmesh_diagnostic_get_statistics(size_t max_statistics_size,
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_diagnostic_clear_statistics();
+
+/***************************************************************************//**
+ *
+ * Enable event sending for friendship diagnostics on the friend node side.
+ * NOTE: On NCP target this can saturate the NCP PHY interface. An alternative
+ * for this is @ref sl_btmesh_diagnostic_get_friend
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_btmesh_evt_diagnostic_friend_queue
+ *   - @ref sl_btmesh_evt_diagnostic_friend_relay
+ *   - @ref sl_btmesh_evt_diagnostic_friend_remove
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_diagnostic_enable_friend();
+
+/***************************************************************************//**
+ *
+ * Disable event sending for friendship diagnostics on the friend node side.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_diagnostic_disable_friend();
+
+/***************************************************************************//**
+ *
+ * Get friend event counters.
+ *
+ * @param[out] queue_counter Number of messages queued for LPNs.
+ * @param[out] relay_counter Number of messages relayed to LPNs as a response to
+ *   polls.
+ * @param[out] remove_counter_sent Number of messages discarded from LPN
+ *   friendship queues due to message having been to sent to LPN and
+ *   acknowledged by LPN by it sending the next poll.
+ * @param[out] remove_counter_old_pdu Number of messages discarded from LPN
+ *   friendship queues due to message queue overflow, resulting in the need to
+ *   flush the oldest PDU un the queue
+ * @param[out] remove_counter_old_segack Number of messages discarded from LPN
+ *   friendship queues due to a new segment acknowledgement message replacing an
+ *   old one in the queue.
+ * @param[out] remove_counter_old_segment Number of messages discarded from LPN
+ *   friendship queues due to invalidated segments being removed from the queue.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_diagnostic_get_friend(uint32_t *queue_counter,
+                                            uint32_t *relay_counter,
+                                            uint32_t *remove_counter_sent,
+                                            uint32_t *remove_counter_old_pdu,
+                                            uint32_t *remove_counter_old_segack,
+                                            uint32_t *remove_counter_old_segment);
 
 /** @} */ // end addtogroup sl_btmesh_diagnostic
 
@@ -22560,6 +22849,9 @@ PACKSTRUCT( struct sl_btmesh_msg {
     sl_btmesh_evt_silabs_config_server_model_option_changed_t    evt_silabs_config_server_model_option_changed; /**< Data field for silabs_config_server model_option_changed event*/
     sl_btmesh_evt_silabs_config_server_network_pdu_changed_t     evt_silabs_config_server_network_pdu_changed; /**< Data field for silabs_config_server network_pdu_changed event*/
     sl_btmesh_evt_diagnostic_relay_t                             evt_diagnostic_relay; /**< Data field for diagnostic relay event*/
+    sl_btmesh_evt_diagnostic_friend_queue_t                      evt_diagnostic_friend_queue; /**< Data field for diagnostic friend_queue event*/
+    sl_btmesh_evt_diagnostic_friend_relay_t                      evt_diagnostic_friend_relay; /**< Data field for diagnostic friend_relay event*/
+    sl_btmesh_evt_diagnostic_friend_remove_t                     evt_diagnostic_friend_remove; /**< Data field for diagnostic friend_remove event*/
     uint8_t payload[SL_BGAPI_MAX_PAYLOAD_SIZE];
   } data;
 });

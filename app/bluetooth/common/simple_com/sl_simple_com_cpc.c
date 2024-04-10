@@ -3,7 +3,7 @@
  * @brief Simple Communication Interface (CPC)
  *******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 
+#include "sl_common.h"
 #include <string.h>
 #include "sl_simple_com.h"
 #include "sl_simple_com_config.h"

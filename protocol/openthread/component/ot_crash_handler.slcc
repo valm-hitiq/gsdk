@@ -15,6 +15,9 @@ requires:
   - name: device
   - name: emlib_rmu
   - name: event_handler
+  - name: ot_core_vendor_extension
+    condition:
+      - ot_ncp
 
 include:
   - path: protocol/openthread/src/legacy_hal/include
@@ -68,8 +71,19 @@ template_contribution:
       handler: efr32PrintResetInfo
     # Maximum priority to ensure this handler is called last during init
     priority: 10000
-    # `efr32PrintResetInfo` is called by `mainloop()` in `sl_ot_rtos_adaptation.c`
-    # Without this `unless`, the device will be stuck in `otPlatUartFlush()`,
-    # trying to print crash data. This is because `otPlatUartFlush()` will try
-    # to use a timer before the kernel is started and before the timer task is created
-    unless: [freertos]
+    # Exceptions:
+    #
+    # - FreeRTOS
+    #   `efr32PrintResetInfo` is called by `mainloop()` in `sl_ot_rtos_adaptation.c`
+    #   Without this `unless`, the device will be stuck in `otPlatUartFlush()`,
+    #   trying to print crash data. This is because `otPlatUartFlush()` will try
+    #   to use a timer before the kernel is started and before the timer task is created
+    #
+    # - ot_ncp
+    #   For RCP with OPENTHREAD_CONFIG_LOG_OUTPUT set to APP, this template
+    #   contribution will cause the logs to be printed over spinel before the
+    #   RCP capabilities are sent to the host.
+    #
+    #   To print logs on NCP/RCP initialization, use the `ot_core_vendor_extension`
+    #   component with this component.
+    unless: [freertos, ot_ncp]

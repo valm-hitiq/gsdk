@@ -1731,9 +1731,12 @@ void RadioSpinel::HandleTransmitDone(uint32_t          aCommand,
     }
 
 exit:
-    // A parse error indicates an RCP misbehavior, so recover the RCP immediately.
+    // Recover the RCP immediately if the error is not one of the expected transmit done errors.
     mState = kStateTransmitDone;
-    if (error != OT_ERROR_PARSE)
+    if (error == OT_ERROR_NONE ||
+        error == OT_ERROR_ABORT ||
+        error == OT_ERROR_NO_ACK ||
+        error == OT_ERROR_CHANNEL_ACCESS_FAILURE)
     {
         mTxError = error;
     }

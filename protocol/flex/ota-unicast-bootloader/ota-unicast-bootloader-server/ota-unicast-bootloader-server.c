@@ -27,7 +27,7 @@
  *
  ******************************************************************************/
 
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include "ota-unicast-bootloader-server-config.h"
 
 #include "stack/include/ember.h"
@@ -541,7 +541,7 @@ static void scheduleImageDistributionProcessNextTask(bool newSegment)
       }
       break;
     default:
-      assert(0);
+      CONNECT_STACK_ASSERT(0);
   }
 }
 
@@ -615,7 +615,7 @@ static void requestTargetForBootload(void)
 static void scheduleBootloadRequestProcessNextTask(bool targetResponeded,
                                                    uint8_t targetResponseStatus)
 {
-  assert(serverInBootloadRequestProcess());
+  CONNECT_STACK_ASSERT(serverInBootloadRequestProcess());
 
   if (stackErrorsCount >= EMBER_AF_PLUGIN_OTA_UNICAST_BOOTLOADER_SERVER_MAX_STACK_ERRORS) {
     bootloadRequestProcessFinished(EMBER_OTA_UNICAST_BOOTLOADER_STATUS_STACK_ERROR);

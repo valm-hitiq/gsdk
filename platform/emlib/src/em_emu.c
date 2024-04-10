@@ -35,6 +35,7 @@
 
 #include "sl_assert.h"
 #include "em_cmu.h"
+#include "em_gpio.h"
 #include "sl_common.h"
 #include "em_core.h"
 #include "em_system.h"
@@ -1011,6 +1012,12 @@ void EMU_EnterEM2(bool restore)
 
   EMU_EM23PresleepHook();
   EMU_EFPEM23PresleepHook();
+
+#if defined(_GPIO_IF_EM4WU_MASK)
+  // Clear all EM4WU interrupts before entering sleep
+  GPIO_IntClear(_GPIO_IF_EM4WU_MASK);
+#endif
+
 #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_205) \
   || defined(ERRATA_FIX_EMU_E110_ENABLE)
 #if defined(ERRATA_FIX_EMU_E110_ENABLE)
@@ -1208,6 +1215,11 @@ void EMU_EnterEM3(bool restore)
 #endif
 #if defined(ERRATA_FIX_DCDC_LNHS_BLOCK_ENABLE)
   dcdcHsFixLnBlock();
+#endif
+
+#if defined(_GPIO_IF_EM4WU_MASK)
+  // Clear all EM4WU interrupts before entering sleep
+  GPIO_IntClear(_GPIO_IF_EM4WU_MASK);
 #endif
 
   EMU_EM23PresleepHook();
@@ -1519,6 +1531,11 @@ void EMU_EnterEM4(void)
 
   EMU_EM4PresleepHook();
   EMU_EFPEM4PresleepHook();
+
+#if defined(_GPIO_IF_EM4WU_MASK)
+  // Clear all EM4WU interrupts before entering sleep
+  GPIO_IntClear(_GPIO_IF_EM4WU_MASK);
+#endif
 
   for (i = 0; i < 4; i++) {
 #if defined(_EMU_EM4CTRL_EM4ENTRY_SHIFT)

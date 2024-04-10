@@ -60,6 +60,7 @@ extern EmberMacAddress *emIndirectQueueSourceAddresses;
 extern uint32_t *emIndirectQueueTimeouts;
 extern uint32_t emberMacIndirectTimeoutMs;
 
+extern uint32_t emberNwkRangeExtenderUpdatePeriodSec;
 extern uint16_t emberCoordinatorFirstShortIdToBeAssigned;
 
 #endif // __EMBER_CONFIGURATION__

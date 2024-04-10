@@ -21,11 +21,13 @@
 #include "ember-multi-network.h"
 static sl_zigbee_event_t app_cli_event;
 
-#define MIN_PAYLOAD_LEN 3
-#define MAX_PAYLOAD_LEN 252
+#define MIN_PAYLOAD_LEN 2
+#define MAX_PAYLOAD_LEN 251
 #define FUTURE_MAX_PAYLOAD_LEN 2049
+
+#define LEN_BYTES (2u)
 // In future parts, there is expected to be support for 2047 byte packets
-static uint8_t local_byte_array[FUTURE_MAX_PAYLOAD_LEN];
+static uint8_t local_byte_array[MAX_PAYLOAD_LEN + LEN_BYTES];
 static uint32_t high_datarate_phy_rx_packet_count = 0;
 static uint32_t high_datarate_phy_tx_packet_count = 0;
 static void app_cli_event_handler(sl_zigbee_event_t *event);
@@ -46,7 +48,7 @@ extern void sli_mac_lower_mac_set_high_datarate_phy_radio_priorities (EmberMulti
  * Default receive callback function for High-BW-phy packets
  * Note that packet does not include 4 byte CRC
  *              packet[0] packet[1] : 2 byte Length (packet[1] << 8 + packet[0])
- *              packet[1] .. packet[Length] payload
+ *              packet[2] .. packet[Length+1] payload
  *              linkQuality of received packet
  *              rssi of received packet
  *
@@ -56,7 +58,7 @@ void sl_high_datarate_phy_rx_cb(uint8_t *packet, uint8_t linkQuality, int8_t rss
 {
   high_datarate_phy_rx_packet_count++;
   sl_zigbee_app_debug_print(" Received Packet : ");
-  for (uint16_t i = 2; i <= (uint16_t)packet[0] + ((uint16_t)packet[1] << 8); i++ ) {
+  for (uint16_t i = 2; i < (uint16_t)packet[0] + ((uint16_t)packet[1] << 8) + LEN_BYTES; i++ ) {
     sl_zigbee_app_debug_print("%02X ", packet[i]);
   }
   sl_zigbee_app_debug_println("\nLQI : %d\nRSSI : %d\n", linkQuality, rssi);
@@ -80,7 +82,7 @@ void sl_high_datarate_phy_tx_cb(uint8_t mac_index, sl_status_t status, PacketHea
 
   sl_zigbee_app_debug_println("\npacket len : %d\n", packet_length);
 
-  for (uint16_t i = 2; i <= packet_length; i++) {
+  for (uint16_t i = 2; i < packet_length + LEN_BYTES; i++) {
     sl_zigbee_app_debug_print("%02X ", packet_pointer[i]);
   }
 
@@ -110,7 +112,7 @@ void sli_high_datarate_phy_init(uint8_t init_level)
  *
  *  @param[in] Function pointer to receive callback
  *              packet[0] packet[1] : 2 byte Length (packet[1] << 8 + packet[0])
- *              packet[1] .. packet[Length] payload
+ *              packet[2] .. packet[Length+1] payload
  *              linkQuality of received packet
  *              rssi of received packet
  *
@@ -158,12 +160,12 @@ void sl_high_datarate_phy_config_radio_priorities(EmberMultiprotocolPriorities *
 }
 
 /**
- * Transmits a High-BW-Phy packet consisting of <len-1> bytes of payload
+ * Transmits a High-BW-Phy packet consisting of <len> bytes of payload
  * Note that there is a 4 byte CRC which is tacked on later and is not part
  * of the packet parameter
  * @param[in] payload Pointer to bytes of transmitted data
  *              packet[0] packet[1] : 2 byte Length (packet[1] << 8 + packet[0])
- *              packet[1] .. packet[Length] payload
+ *              packet[2] .. packet[Length+1] payload
  *
  * CAUTION: Do not call this function from any other RTOS task context except Zigbee
  * This fuction manipulates buffers and will cause unpredictable errors if this rule is not
@@ -182,9 +184,9 @@ sl_status_t sl_high_datarate_phy_transmit(uint8_t *payload)
 }
 /**
  * CLI Command handler to transmit High-BW-Phy packet
- * @param[in] length Transmits a packet that contains <length-1> bytes using the high-BW-phy
+ * @param[in] length Transmits a packet that contains <length> bytes using the high-BW-phy
  *              packet[0] packet[1] : 2 byte Length (packet[1] << 8 + packet[0])
- *              packet[1] .. packet[Length] payload
+ *              packet[2] .. packet[Length+1] payload
  */
 static uint16_t length;
 void sl_high_datarate_phy_tx_command(sl_cli_command_arg_t *arguments)
@@ -198,15 +200,16 @@ void sl_high_datarate_phy_tx_command(sl_cli_command_arg_t *arguments)
  * and this cannot be done from anywhere except the zigbee task context in an RTOS
  * application
  */
+#include "em_gpio.h"
 static void app_cli_event_handler(sl_zigbee_event_t *event)
 {
-  if ( length > FUTURE_MAX_PAYLOAD_LEN ) {
+  if ( length > MAX_PAYLOAD_LEN ) {
     sl_zigbee_app_debug_println("Status = 0x%02x", SL_STATUS_INVALID_PARAMETER);
     return;
   }
   local_byte_array[0] = (uint8_t)(length & 0xFF);
   local_byte_array[1] = (uint8_t)(length >> 8);
-  for (uint16_t i = 2; i <= length; i++) {
+  for (uint16_t i = 2; i < length + LEN_BYTES; i++) {
     local_byte_array[i] = i - 1;
   }
 

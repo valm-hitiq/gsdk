@@ -443,7 +443,7 @@ static void _ping_task_fnc(void *args)
     req.remote_addr.sin6_family = AF_INET6;
     req.remote_addr.sin6_port = htons(SL_WISUN_PING_ICMP_PORT);
 
-    sockid = socket(AF_INET6, SOCK_RAW, IPPROTO_ICMP);
+    sockid = socket(AF_INET6, SOCK_RAW | SOCK_NONBLOCK, IPPROTO_ICMP);
 
     if (sockid == SOCKET_INVALID_ID) {
       _prepare_and_push_failed_response(&resp, SL_WISUN_PING_STATUS_SOCKET_ERROR);

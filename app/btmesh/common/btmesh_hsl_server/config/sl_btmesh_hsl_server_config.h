@@ -16,14 +16,14 @@
 #define SL_BTMESH_HSL_SERVER_PS_KEY_CFG_VAL   (0x4008)
 
 // <o SL_BTMESH_HSL_SERVER_HUE_UPDATE_PERIOD_CFG_VAL> Periodicity [ms] for updating the hue during a transition.
-// <i> Default: 1
+// <i> Default: 10
 // <i> Periodicity [ms] for updating the hue during a transition.
-#define SL_BTMESH_HSL_SERVER_HUE_UPDATE_PERIOD_CFG_VAL   (1)
+#define SL_BTMESH_HSL_SERVER_HUE_UPDATE_PERIOD_CFG_VAL   (10)
 
 // <o SL_BTMESH_HSL_SERVER_SATURATION_UPDATE_PERIOD_CFG_VAL> Periodicity [ms] for updating the saturation during a transition.
-// <i> Default: 1
+// <i> Default: 10
 // <i> Periodicity [ms] for updating the saturation during a transition.
-#define SL_BTMESH_HSL_SERVER_SATURATION_UPDATE_PERIOD_CFG_VAL   (1)
+#define SL_BTMESH_HSL_SERVER_SATURATION_UPDATE_PERIOD_CFG_VAL   (10)
 
 // <o SL_BTMESH_HSL_SERVER_HUE_UI_UPDATE_PERIOD_CFG_VAL> Periodicity [ms] for updating the UI with hue during a transition.
 // <i> Default: 100

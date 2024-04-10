@@ -37,6 +37,7 @@
 
 #include "app_assert.h"
 #include "app_timer.h"
+#include "sl_sleeptimer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -74,12 +75,14 @@ static int16_t start_deltauv;
 /// target level of delta UV transition
 static int16_t target_deltauv;
 
-/// temperature transition time in timer ticks
-static uint32_t temp_transtime_ticks;
+/// temperature transition time in ms
+static uint32_t temp_transtime_ms;
 /// time elapsed from temperature transition start
 static uint32_t temp_transtime_elapsed;
 /// non-zero if temperature transition is active
 static uint8_t temp_transitioning;
+/// timestamp of the last sleeptimer tick
+static uint64_t last_tick;
 
 static app_timer_t transition_timer;
 
@@ -109,6 +112,13 @@ static void transition_timer_cb(app_timer_t *timer, void *data)
 {
   (void)data;
   (void)timer;
+
+  // Use sleeptimer to account for scheduling errors
+  uint64_t current_tick = sl_sleeptimer_get_tick_count64();
+  uint64_t period_ms = 0;
+  sl_sleeptimer_tick64_to_ms(current_tick - last_tick, &period_ms);
+  last_tick = current_tick;
+
   // Initialize the variable to UI update period in order to trigger a UI update
   // at the beginning of the transition.
   static uint16_t time_elapsed_since_ui_update = SL_BTMESH_CTL_SERVER_UI_UPDATE_PERIOD_CFG_VAL;
@@ -118,9 +128,9 @@ static void transition_timer_cb(app_timer_t *timer, void *data)
     app_assert_status_f(sc, "Failed to stop Periodic Level Transition Timer\n");
     return;
   } else {
-    temp_transtime_elapsed++;
+    temp_transtime_elapsed += period_ms;
 
-    if (temp_transtime_elapsed >= temp_transtime_ticks) {
+    if (temp_transtime_elapsed >= temp_transtime_ms) {
       // transition complete
       temp_transitioning = 0;
       current_temperature = target_temperature;
@@ -139,24 +149,24 @@ static void transition_timer_cb(app_timer_t *timer, void *data)
         current_temperature = start_temperature
                               + (target_temperature - start_temperature)
                               * (uint64_t)temp_transtime_elapsed
-                              / temp_transtime_ticks;
+                              / temp_transtime_ms;
       } else {
         current_temperature = start_temperature
                               - (start_temperature - target_temperature)
                               * (uint64_t)temp_transtime_elapsed
-                              / temp_transtime_ticks;
+                              / temp_transtime_ms;
       }
 
       if (target_deltauv >= start_deltauv) {
         current_deltauv = start_deltauv
                           + (target_deltauv - start_deltauv)
                           * (uint64_t)temp_transtime_elapsed
-                          / temp_transtime_ticks;
+                          / temp_transtime_ms;
       } else {
         current_deltauv = start_deltauv
                           - (start_deltauv - target_deltauv)
                           * (uint64_t)temp_transtime_elapsed
-                          / temp_transtime_ticks;
+                          / temp_transtime_ms;
       }
 
       // When transition is ongoing generate an event to application once every
@@ -191,6 +201,9 @@ void sl_btmesh_ctl_set_temperature_deltauv_level(uint16_t temperature,
     temperature = SL_BTMESH_CTL_SERVER_MAXIMUM_TEMPERATURE_CFG_VAL;
   }
 
+  // get last tick before running the first transition timer
+  last_tick = sl_sleeptimer_get_tick_count64();
+
   if (transition_ms == 0) {
     current_temperature = temperature;
     current_deltauv = deltauv;
@@ -207,7 +220,7 @@ void sl_btmesh_ctl_set_temperature_deltauv_level(uint16_t temperature,
     return;
   }
 
-  temp_transtime_ticks = transition_ms;
+  temp_transtime_ms = transition_ms;
 
   start_temperature = current_temperature;
   target_temperature = temperature;
@@ -226,6 +239,9 @@ void sl_btmesh_ctl_set_temperature_deltauv_level(uint16_t temperature,
                                    NO_CALLBACK_DATA,
                                    true);
   app_assert_status_f(sc, "Failed to start periodic Transition Timer\n");
+
+  // run first transition since the timer will not trigger now
+  transition_timer_cb(NULL, NULL);
 
   return;
 }

@@ -65,7 +65,13 @@ void* esl_core_encrypt_message(void *msg, uint8_t *len)
   status = esl_core_read_response_key(&key_material);
 
   if (status == SL_STATUS_OK) {
-    status = sl_bt_ead_session_init(&key_material, NULL, &nonce);
+    status = esl_core_get_randomizer(nonce.randomizer);
+  }
+
+  if (status == SL_STATUS_OK) {
+    status = sl_bt_ead_session_init(&key_material,
+                                    nonce.randomizer,
+                                    &nonce);
   }
 
   if (status == SL_STATUS_OK) {

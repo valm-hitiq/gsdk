@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"ZWAVE-PK800A"'
   - name: SL_KIT_REV
-    value: '"A00"'
+    value: '"B01"'
 - tag:
   - kit:opn:ZWAVE-PK800A
   - kit:pn:PK800
   - kit:variant:A
-  - kit:revision:A00
+  - kit:revision:B01

@@ -124,6 +124,10 @@ enum sli_btmesh_command_id
     sli_btmesh_node_set_oob_uri_command_id = 0x33,
     sli_btmesh_node_get_oob_uri_command_id = 0x34,
     sli_btmesh_node_set_proxy_service_uuid_command_id = 0x35,
+    sli_btmesh_node_set_proxy_service_scan_response_command_id = 0x37,
+    sli_btmesh_node_clear_proxy_service_scan_response_command_id = 0x38,
+    sli_btmesh_node_set_provisioning_service_scan_response_command_id = 0x39,
+    sli_btmesh_node_clear_provisioning_service_scan_response_command_id = 0x3a,
     sli_btmesh_prov_init_command_id = 0x00,
     sli_btmesh_prov_scan_unprov_beacons_command_id = 0x01,
     sli_btmesh_prov_create_provisioning_session_command_id = 0x41,
@@ -186,6 +190,7 @@ enum sli_btmesh_command_id
     sli_btmesh_vendor_model_deinit_command_id = 0x05,
     sli_btmesh_vendor_model_send_tracked_command_id = 0x06,
     sli_btmesh_vendor_model_set_publication_tracked_command_id = 0x07,
+    sli_btmesh_vendor_model_set_option_command_id = 0x08,
     sli_btmesh_health_client_init_command_id = 0x07,
     sli_btmesh_health_client_deinit_command_id = 0x08,
     sli_btmesh_health_client_get_command_id = 0x00,
@@ -589,6 +594,9 @@ enum sli_btmesh_command_id
     sli_btmesh_diagnostic_get_relay_command_id = 0x04,
     sli_btmesh_diagnostic_get_statistics_command_id = 0x05,
     sli_btmesh_diagnostic_clear_statistics_command_id = 0x06,
+    sli_btmesh_diagnostic_enable_friend_command_id = 0x07,
+    sli_btmesh_diagnostic_disable_friend_command_id = 0x08,
+    sli_btmesh_diagnostic_get_friend_command_id = 0x09,
 };
 
 enum sli_btmesh_response_id
@@ -637,6 +645,10 @@ enum sli_btmesh_response_id
     sli_btmesh_node_set_oob_uri_response_id = 0x33,
     sli_btmesh_node_get_oob_uri_response_id = 0x34,
     sli_btmesh_node_set_proxy_service_uuid_response_id = 0x35,
+    sli_btmesh_node_set_proxy_service_scan_response_response_id = 0x37,
+    sli_btmesh_node_clear_proxy_service_scan_response_response_id = 0x38,
+    sli_btmesh_node_set_provisioning_service_scan_response_response_id = 0x39,
+    sli_btmesh_node_clear_provisioning_service_scan_response_response_id = 0x3a,
     sli_btmesh_prov_init_response_id = 0x00,
     sli_btmesh_prov_scan_unprov_beacons_response_id = 0x01,
     sli_btmesh_prov_create_provisioning_session_response_id = 0x41,
@@ -699,6 +711,7 @@ enum sli_btmesh_response_id
     sli_btmesh_vendor_model_deinit_response_id = 0x05,
     sli_btmesh_vendor_model_send_tracked_response_id = 0x06,
     sli_btmesh_vendor_model_set_publication_tracked_response_id = 0x07,
+    sli_btmesh_vendor_model_set_option_response_id = 0x08,
     sli_btmesh_health_client_init_response_id = 0x07,
     sli_btmesh_health_client_deinit_response_id = 0x08,
     sli_btmesh_health_client_get_response_id = 0x00,
@@ -1102,6 +1115,9 @@ enum sli_btmesh_response_id
     sli_btmesh_diagnostic_get_relay_response_id = 0x04,
     sli_btmesh_diagnostic_get_statistics_response_id = 0x05,
     sli_btmesh_diagnostic_clear_statistics_response_id = 0x06,
+    sli_btmesh_diagnostic_enable_friend_response_id = 0x07,
+    sli_btmesh_diagnostic_disable_friend_response_id = 0x08,
+    sli_btmesh_diagnostic_get_friend_response_id = 0x09,
 };
 
 enum sli_btmesh_event_id
@@ -1350,6 +1366,9 @@ enum sli_btmesh_event_id
     sli_btmesh_silabs_config_server_model_option_changed_event_id = 0x01,
     sli_btmesh_silabs_config_server_network_pdu_changed_event_id = 0x02,
     sli_btmesh_diagnostic_relay_event_id = 0x00,
+    sli_btmesh_diagnostic_friend_queue_event_id = 0x01,
+    sli_btmesh_diagnostic_friend_relay_event_id = 0x02,
+    sli_btmesh_diagnostic_friend_remove_event_id = 0x03,
 };
 
 PACKSTRUCT( struct sl_bt_rsp_error_s
@@ -1578,6 +1597,31 @@ PACKSTRUCT( struct sl_btmesh_cmd_node_set_proxy_service_uuid_s
 });
 
 typedef struct sl_btmesh_cmd_node_set_proxy_service_uuid_s sl_btmesh_cmd_node_set_proxy_service_uuid_t;
+
+
+PACKSTRUCT( struct sl_btmesh_cmd_node_set_proxy_service_scan_response_s
+{
+    uint16_t netkey_index;
+    uint8array scan_response_data;
+});
+
+typedef struct sl_btmesh_cmd_node_set_proxy_service_scan_response_s sl_btmesh_cmd_node_set_proxy_service_scan_response_t;
+
+
+PACKSTRUCT( struct sl_btmesh_cmd_node_clear_proxy_service_scan_response_s
+{
+    uint16_t netkey_index;
+});
+
+typedef struct sl_btmesh_cmd_node_clear_proxy_service_scan_response_s sl_btmesh_cmd_node_clear_proxy_service_scan_response_t;
+
+
+PACKSTRUCT( struct sl_btmesh_cmd_node_set_provisioning_service_scan_response_s
+{
+    uint8array scan_response_data;
+});
+
+typedef struct sl_btmesh_cmd_node_set_provisioning_service_scan_response_s sl_btmesh_cmd_node_set_provisioning_service_scan_response_t;
 
 
 PACKSTRUCT( struct sl_btmesh_cmd_prov_create_provisioning_session_s
@@ -2114,6 +2158,15 @@ PACKSTRUCT( struct sl_btmesh_cmd_vendor_model_set_publication_tracked_s
 });
 
 typedef struct sl_btmesh_cmd_vendor_model_set_publication_tracked_s sl_btmesh_cmd_vendor_model_set_publication_tracked_t;
+
+
+PACKSTRUCT( struct sl_btmesh_cmd_vendor_model_set_option_s
+{
+    uint8_t option;
+    uint32_t value;
+});
+
+typedef struct sl_btmesh_cmd_vendor_model_set_option_s sl_btmesh_cmd_vendor_model_set_option_t;
 
 
 PACKSTRUCT( struct sl_btmesh_cmd_health_client_get_s
@@ -5438,6 +5491,15 @@ PACKSTRUCT( struct sl_btmesh_cmd_silabs_config_server_set_network_pdu_s
 typedef struct sl_btmesh_cmd_silabs_config_server_set_network_pdu_s sl_btmesh_cmd_silabs_config_server_set_network_pdu_t;
 
 
+PACKSTRUCT( struct sl_btmesh_cmd_diagnostic_get_statistics_s
+{
+    uint32_t requested_chunk;
+    uint32_t requested_offset;
+});
+
+typedef struct sl_btmesh_cmd_diagnostic_get_statistics_s sl_btmesh_cmd_diagnostic_get_statistics_t;
+
+
 
 
 PACKSTRUCT( struct sl_btmesh_rsp_node_init_s
@@ -5811,6 +5873,38 @@ PACKSTRUCT( struct sl_btmesh_rsp_node_set_proxy_service_uuid_s
 });
 
 typedef struct sl_btmesh_rsp_node_set_proxy_service_uuid_s sl_btmesh_rsp_node_set_proxy_service_uuid_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_node_set_proxy_service_scan_response_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_node_set_proxy_service_scan_response_s sl_btmesh_rsp_node_set_proxy_service_scan_response_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_node_clear_proxy_service_scan_response_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_node_clear_proxy_service_scan_response_s sl_btmesh_rsp_node_clear_proxy_service_scan_response_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_node_set_provisioning_service_scan_response_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_node_set_provisioning_service_scan_response_s sl_btmesh_rsp_node_set_provisioning_service_scan_response_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_node_clear_provisioning_service_scan_response_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_node_clear_provisioning_service_scan_response_s sl_btmesh_rsp_node_clear_provisioning_service_scan_response_t;
 
 
 PACKSTRUCT( struct sl_btmesh_rsp_prov_init_s
@@ -6321,6 +6415,14 @@ PACKSTRUCT( struct sl_btmesh_rsp_vendor_model_set_publication_tracked_s
 });
 
 typedef struct sl_btmesh_rsp_vendor_model_set_publication_tracked_s sl_btmesh_rsp_vendor_model_set_publication_tracked_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_vendor_model_set_option_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_vendor_model_set_option_s sl_btmesh_rsp_vendor_model_set_option_t;
 
 
 PACKSTRUCT( struct sl_btmesh_rsp_health_client_init_s
@@ -9741,6 +9843,8 @@ typedef struct sl_btmesh_rsp_diagnostic_get_relay_s sl_btmesh_rsp_diagnostic_get
 PACKSTRUCT( struct sl_btmesh_rsp_diagnostic_get_statistics_s
 {
     uint16_t result;
+    uint32_t total_length;
+    uint32_t chunk_offset;
     uint8array statistics;
 });
 
@@ -9753,6 +9857,36 @@ PACKSTRUCT( struct sl_btmesh_rsp_diagnostic_clear_statistics_s
 });
 
 typedef struct sl_btmesh_rsp_diagnostic_clear_statistics_s sl_btmesh_rsp_diagnostic_clear_statistics_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_diagnostic_enable_friend_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_diagnostic_enable_friend_s sl_btmesh_rsp_diagnostic_enable_friend_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_diagnostic_disable_friend_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_diagnostic_disable_friend_s sl_btmesh_rsp_diagnostic_disable_friend_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_diagnostic_get_friend_s
+{
+    uint16_t result;
+    uint32_t queue_counter;
+    uint32_t relay_counter;
+    uint32_t remove_counter_sent;
+    uint32_t remove_counter_old_pdu;
+    uint32_t remove_counter_old_segack;
+    uint32_t remove_counter_old_segment;
+});
+
+typedef struct sl_btmesh_rsp_diagnostic_get_friend_s sl_btmesh_rsp_diagnostic_get_friend_t;
 
 
 
@@ -9786,6 +9920,9 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_cmd_node_get_local_model_metadata_page_t           cmd_node_get_local_model_metadata_page;
     sl_btmesh_cmd_node_set_oob_uri_t                             cmd_node_set_oob_uri;
     sl_btmesh_cmd_node_set_proxy_service_uuid_t                  cmd_node_set_proxy_service_uuid;
+    sl_btmesh_cmd_node_set_proxy_service_scan_response_t         cmd_node_set_proxy_service_scan_response;
+    sl_btmesh_cmd_node_clear_proxy_service_scan_response_t       cmd_node_clear_proxy_service_scan_response;
+    sl_btmesh_cmd_node_set_provisioning_service_scan_response_t  cmd_node_set_provisioning_service_scan_response;
     sl_btmesh_cmd_prov_create_provisioning_session_t             cmd_prov_create_provisioning_session;
     sl_btmesh_cmd_prov_set_provisioning_suspend_event_t          cmd_prov_set_provisioning_suspend_event;
     sl_btmesh_cmd_prov_provision_adv_device_t                    cmd_prov_provision_adv_device;
@@ -9840,6 +9977,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_cmd_vendor_model_deinit_t                          cmd_vendor_model_deinit;
     sl_btmesh_cmd_vendor_model_send_tracked_t                    cmd_vendor_model_send_tracked;
     sl_btmesh_cmd_vendor_model_set_publication_tracked_t         cmd_vendor_model_set_publication_tracked;
+    sl_btmesh_cmd_vendor_model_set_option_t                      cmd_vendor_model_set_option;
     sl_btmesh_cmd_health_client_get_t                            cmd_health_client_get;
     sl_btmesh_cmd_health_client_clear_t                          cmd_health_client_clear;
     sl_btmesh_cmd_health_client_test_t                           cmd_health_client_test;
@@ -10161,6 +10299,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_cmd_silabs_config_server_set_model_enable_t        cmd_silabs_config_server_set_model_enable;
     sl_btmesh_cmd_silabs_config_server_get_model_enable_t        cmd_silabs_config_server_get_model_enable;
     sl_btmesh_cmd_silabs_config_server_set_network_pdu_t         cmd_silabs_config_server_set_network_pdu;
+    sl_btmesh_cmd_diagnostic_get_statistics_t                    cmd_diagnostic_get_statistics;
     sl_btmesh_rsp_node_init_t                                    rsp_node_init;
     sl_btmesh_rsp_node_set_exportable_keys_t                     rsp_node_set_exportable_keys;
     sl_btmesh_rsp_node_start_unprov_beaconing_t                  rsp_node_start_unprov_beaconing;
@@ -10205,6 +10344,10 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_rsp_node_set_oob_uri_t                             rsp_node_set_oob_uri;
     sl_btmesh_rsp_node_get_oob_uri_t                             rsp_node_get_oob_uri;
     sl_btmesh_rsp_node_set_proxy_service_uuid_t                  rsp_node_set_proxy_service_uuid;
+    sl_btmesh_rsp_node_set_proxy_service_scan_response_t         rsp_node_set_proxy_service_scan_response;
+    sl_btmesh_rsp_node_clear_proxy_service_scan_response_t       rsp_node_clear_proxy_service_scan_response;
+    sl_btmesh_rsp_node_set_provisioning_service_scan_response_t  rsp_node_set_provisioning_service_scan_response;
+    sl_btmesh_rsp_node_clear_provisioning_service_scan_response_t rsp_node_clear_provisioning_service_scan_response;
     sl_btmesh_rsp_prov_init_t                                    rsp_prov_init;
     sl_btmesh_rsp_prov_scan_unprov_beacons_t                     rsp_prov_scan_unprov_beacons;
     sl_btmesh_rsp_prov_create_provisioning_session_t             rsp_prov_create_provisioning_session;
@@ -10267,6 +10410,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_rsp_vendor_model_deinit_t                          rsp_vendor_model_deinit;
     sl_btmesh_rsp_vendor_model_send_tracked_t                    rsp_vendor_model_send_tracked;
     sl_btmesh_rsp_vendor_model_set_publication_tracked_t         rsp_vendor_model_set_publication_tracked;
+    sl_btmesh_rsp_vendor_model_set_option_t                      rsp_vendor_model_set_option;
     sl_btmesh_rsp_health_client_init_t                           rsp_health_client_init;
     sl_btmesh_rsp_health_client_deinit_t                         rsp_health_client_deinit;
     sl_btmesh_rsp_health_client_get_t                            rsp_health_client_get;
@@ -10670,6 +10814,9 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_rsp_diagnostic_get_relay_t                         rsp_diagnostic_get_relay;
     sl_btmesh_rsp_diagnostic_get_statistics_t                    rsp_diagnostic_get_statistics;
     sl_btmesh_rsp_diagnostic_clear_statistics_t                  rsp_diagnostic_clear_statistics;
+    sl_btmesh_rsp_diagnostic_enable_friend_t                     rsp_diagnostic_enable_friend;
+    sl_btmesh_rsp_diagnostic_disable_friend_t                    rsp_diagnostic_disable_friend;
+    sl_btmesh_rsp_diagnostic_get_friend_t                        rsp_diagnostic_get_friend;
     sl_btmesh_evt_node_initialized_t                             evt_node_initialized;
     sl_btmesh_evt_node_provisioned_t                             evt_node_provisioned;
     sl_btmesh_evt_node_config_get_t                              evt_node_config_get;
@@ -10910,6 +11057,9 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_evt_silabs_config_server_model_option_changed_t    evt_silabs_config_server_model_option_changed;
     sl_btmesh_evt_silabs_config_server_network_pdu_changed_t     evt_silabs_config_server_network_pdu_changed;
     sl_btmesh_evt_diagnostic_relay_t                             evt_diagnostic_relay;
+    sl_btmesh_evt_diagnostic_friend_queue_t                      evt_diagnostic_friend_queue;
+    sl_btmesh_evt_diagnostic_friend_relay_t                      evt_diagnostic_friend_relay;
+    sl_btmesh_evt_diagnostic_friend_remove_t                     evt_diagnostic_friend_remove;
     uint8_t payload[SL_BGAPI_MAX_PAYLOAD_SIZE];
   } data;
 });

@@ -75,7 +75,9 @@ typedef enum {
   /// This event is sent on LFN Wake Up.
   SL_WISUN_MSG_LFN_WAKE_UP_IND_ID                 = 0x90,
   /// Indicate a multicast group registration finishes
-  SL_WISUN_MSG_LFN_MULTICAST_REG_IND_ID      = 0x91,
+  SL_WISUN_MSG_LFN_MULTICAST_REG_IND_ID           = 0x91,
+  /// Indicate DHCPv6 Vendor Data
+  SL_WISUN_MSG_DHCP_VENDOR_DATA_IND_ID            = 0x92,
 } sl_wisun_msg_ind_id_t;
 
 /**************************************************************************//**
@@ -556,6 +558,35 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_LFN_MULTICAST_REG_IND) */
 
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_DHCP_VENDOR_DATA_IND sl_wisun_msg_dhcp_vendor_data_ind
+ * @{
+ ******************************************************************************/
+
+/// Indication message body
+SL_PACK_START(1)
+typedef struct {
+  /// Vendor Specific Enterprise Number
+  uint32_t enterprise_number;
+  /// Length of Vendor specific data
+  uint16_t data_length;
+  /// Vendor specific data
+  uint8_t data[];
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_dhcp_vendor_data_ind_body_t;
+SL_PACK_END()
+
+/// Indication message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Indication message body
+  sl_wisun_msg_dhcp_vendor_data_ind_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_dhcp_vendor_data_ind_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_DHCP_VENDOR_DATA_IND) */
+
 /// @brief Wi-SUN event definitions
 /// @details This structure contains a Wi-SUN API event and its associated data.
 SL_PACK_START(1)
@@ -603,6 +634,8 @@ typedef struct {
     sl_wisun_msg_lfn_wake_up_ind_body_t lfn_wake_up;
     /// #SL_WISUN_MSG_LFN_MULTICAST_REG_IND_ID event data
     sl_wisun_msg_lfn_multicast_reg_ind_body_t lfn_multicast_reg;
+    /// #SL_WISUN_MSG_DHCP_VENDOR_DATA_IND_ID event data
+    sl_wisun_msg_dhcp_vendor_data_ind_body_t dhcp_vendor_data;
   } evt;
 } SL_ATTRIBUTE_PACKED sl_wisun_evt_t;
 SL_PACK_END()

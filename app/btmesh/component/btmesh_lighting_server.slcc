@@ -42,6 +42,8 @@ requires:
   - name: "btmesh_stack_generic_server"
   - name: "btmesh_stack_node"
   - name: "btmesh_generic_server"
+  - name: "component_catalog"
+  - name: "sleeptimer"
   - name: "btmesh_stack"
   - name: "app_timer"
 recommends:

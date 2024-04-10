@@ -56,6 +56,9 @@
  ********************************************************************************************************
  *******************************************************************************************************/
 
+#define  USB_BULK_IN_OPTIMIZATION_MAX_XFER_BURST_BYTES   (8u * MAX_PKT_SIZE)
+#define  USB_BULK_OUT_OPTIMIZATION_MAX_XFER_BURST_BYTES  (8u * MAX_PKT_SIZE)
+
 #define  REG_VAL_TO                        0x1Fu
 #define  REG_FMOD_TO                       0x7FFFFu
 
@@ -984,8 +987,10 @@ sl_status_t sli_usbd_driver_endpoint_rx_start(uint8_t   ep_addr,
   uint8_t          ep_phy_nbr;
   uint16_t          ep_pkt_len;
   uint16_t          pkt_cnt;
+  uint16_t         pkt_size_temp;
   uint32_t          ctl_reg;
   uint32_t          tsiz_reg;
+  uint32_t         ep_type;
   __IOM uint32_t *doep_ctl_ptr;
   __IOM uint32_t *doep_tsiz_ptr;
   __IOM uint32_t *doep_dmaaddr_ptr;
@@ -999,7 +1004,6 @@ sl_status_t sli_usbd_driver_endpoint_rx_start(uint8_t   ep_addr,
 
   ep_log_nbr = SL_USBD_ENDPOINT_ADDR_TO_LOG(ep_addr);
   ep_phy_nbr = SL_USBD_ENDPOINT_ADDR_TO_PHY(ep_addr);
-  ep_pkt_len = (uint16_t)SLI_USBD_GET_MIN(buf_len, usbd_driver_data.EP_MaxPktSize[ep_phy_nbr]);
 
   SLI_USBD_LOG_VRB(("USBD driver EP FIFO RxStart for endpoint addr: 0x", (X)ep_addr));
 
@@ -1007,6 +1011,20 @@ sl_status_t sli_usbd_driver_endpoint_rx_start(uint8_t   ep_addr,
   doep_ctl_ptr = (ep_log_nbr != 0) ?  &USB_REG->DOEP_REG[ep_log_nbr - 1].CTL : &USB_REG->DOEP0CTL;
   doep_tsiz_ptr = (ep_log_nbr != 0) ? &USB_REG->DOEP_REG[ep_log_nbr - 1].TSIZ : &USB_REG->DOEP0TSIZ;
   doep_dmaaddr_ptr = (ep_log_nbr != 0) ? &USB_REG->DOEP_REG[ep_log_nbr - 1].DMAADDR : &USB_REG->DOEP0DMAADDR;
+
+  ep_type = (*doep_ctl_ptr >> 18u) & 0x03u;
+
+  if ((SL_USBD_ENDPOINT_IS_IN(ep_addr) == false) \
+      && (ep_type == SL_USBD_ENDPOINT_TYPE_BULK)) {
+    // The default burst value of USB_BULK_OUT_OPTIMIZATION_MAX_XFER_BURST_BYTES is 8 64-byte packet.
+    // It allows to have burst of packets between 2 and 8 packets (if the application Rx buffer is large enough)
+    // before notifying the USB Core layer about a transfer completion.
+    pkt_size_temp = USB_BULK_OUT_OPTIMIZATION_MAX_XFER_BURST_BYTES;
+  } else {
+    pkt_size_temp = usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];
+  }
+
+  ep_pkt_len = (uint16_t)SLI_USBD_GET_MIN(buf_len, pkt_size_temp);
 
   // Read Control and Transfer EP registers
   ctl_reg = *doep_ctl_ptr;
@@ -1016,18 +1034,19 @@ sl_status_t sli_usbd_driver_endpoint_rx_start(uint8_t   ep_addr,
   tsiz_reg &= ~(DOEPTSIZx_XFRSIZ_MSK | DOEPTSIZx_PKTCNT_MSK);
 
   if (buf_len == 0u) {
-    tsiz_reg |= usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];     // Set transfer size to max pkt size
-    tsiz_reg |= (1u << 19u);                                    // Set packet count
+    tsiz_reg |= usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];       // Set transfer size to max pkt size
+    tsiz_reg |= (1u << 19u);                                      // Set packet count
+    pkt_cnt = 1u;
   } else {
     pkt_cnt = (ep_pkt_len + (usbd_driver_data.EP_MaxPktSize[ep_phy_nbr] - 1u))
               / usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];
-    tsiz_reg |= (pkt_cnt << 19u);                               // Set packet count
-                                                                // Set transfer size
+    tsiz_reg |= (pkt_cnt << 19u);                                 // Set packet count
+    // Set transfer size
     tsiz_reg |= pkt_cnt * usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];
   }
 
   usbd_driver_data.EP_AppBufPtr[ep_phy_nbr] = p_buf;
-  usbd_driver_data.EP_AppBufLen[ep_phy_nbr] = ep_pkt_len;
+  usbd_driver_data.EP_AppBufLen[ep_phy_nbr] = pkt_cnt * usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];
 
   // Set buffer address to receive data
   *doep_dmaaddr_ptr = (uint32_t)usbd_driver_data.EP_AppBufPtr[ep_phy_nbr];
@@ -1085,6 +1104,10 @@ sl_status_t sli_usbd_driver_endpoint_rx_zlp(uint8_t ep_addr)
 
 /****************************************************************************************************//**
 *  Configure endpoint with buffer to transmit data
+*
+* Note(s) : (1) USB_BULK_IN_OPTIMIZATION_MAX_XFER_BURST_BYTES is equal to 8 packets of 64 bytes
+*               because the USB OTG FS peripheral has the following characteristics: the maximum
+*               number of packets maintained by the core at any time in an IN endpoint FIFO is 8.
 ********************************************************************************************************/
 sl_status_t sli_usbd_driver_endpoint_tx(uint8_t   ep_addr,
                                         uint8_t   *p_buf,
@@ -1094,7 +1117,10 @@ sl_status_t sli_usbd_driver_endpoint_tx(uint8_t   ep_addr,
   uint8_t       ep_phy_nbr;
   uint16_t       ep_pkt_len;
   uint8_t          ep_log_nbr;
+  uint16_t      pkt_size_temp;
+  uint32_t      ep_type;
   __IOM uint32_t *diep_dmaaddr_ptr;
+  __IOM uint32_t *diep_ctl_ptr;
 
   // Validate that the buffer is correctly 4 bytes aligned
   if (((uint32_t)p_buf % BUFFER_BYTE_ALIGNMENT) != 0u) {
@@ -1103,7 +1129,19 @@ sl_status_t sli_usbd_driver_endpoint_tx(uint8_t   ep_addr,
 
   ep_phy_nbr = SL_USBD_ENDPOINT_ADDR_TO_PHY(ep_addr);
   ep_log_nbr = SL_USBD_ENDPOINT_ADDR_TO_LOG(ep_addr);
-  ep_pkt_len = (uint16_t)SLI_USBD_GET_MIN(usbd_driver_data.EP_MaxPktSize[ep_phy_nbr], buf_len);
+
+  diep_ctl_ptr = (ep_log_nbr != 0) ? &USB_REG->DIEP_REG[ep_log_nbr - 1].CTL : &USB_REG->DIEP0CTL;
+  ep_type = (*diep_ctl_ptr >> 18u) & 0x03u;
+
+  if ((SL_USBD_ENDPOINT_IS_IN(ep_addr) == true) \
+      && (ep_type == SL_USBD_ENDPOINT_TYPE_BULK)) {
+    // See Note #1.
+    pkt_size_temp = USB_BULK_IN_OPTIMIZATION_MAX_XFER_BURST_BYTES;
+  } else {
+    pkt_size_temp = usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];
+  }
+
+  ep_pkt_len = (uint16_t)SLI_USBD_GET_MIN(pkt_size_temp, buf_len);
 
   diep_dmaaddr_ptr = (ep_log_nbr != 0) ? &USB_REG->DIEP_REG[ep_log_nbr - 1].DMAADDR : &USB_REG->DIEP0DMAADDR;
 
@@ -1125,6 +1163,7 @@ sl_status_t sli_usbd_driver_endpoint_tx_start(uint8_t  ep_addr,
   uint8_t ep_log_nbr;
   uint32_t ctl_reg;
   uint32_t tsiz_reg;
+  uint32_t ep_type;
   __IOM uint32_t *diep_ctl_ptr;
   __IOM uint32_t *diep_tsiz_ptr;
 
@@ -1142,7 +1181,22 @@ sl_status_t sli_usbd_driver_endpoint_tx_start(uint8_t  ep_addr,
 
   tsiz_reg &= ~DIEPTSIZx_XFRSIZ_MSK;   // Clear EP transfer size
   tsiz_reg |= buf_len;                 // Transfer size
-  tsiz_reg |= (1u << 19u);             // Packet count
+
+  ep_type = (*diep_ctl_ptr >> 18u) & 0x03u;
+
+  if ((SL_USBD_ENDPOINT_IS_IN(ep_addr) == true) \
+      && (ep_type == SL_USBD_ENDPOINT_TYPE_BULK)
+      && (buf_len != 0)) {
+    uint8_t   ep_phy_nbr = SL_USBD_ENDPOINT_ADDR_TO_PHY(ep_addr);
+    uint16_t  max_pkt_size = usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];
+    uint32_t  pkt_cnt  = buf_len / max_pkt_size;
+
+    pkt_cnt += ((buf_len % max_pkt_size) == 0u) ? 0 : 1;
+
+    tsiz_reg |= (pkt_cnt << 19u);               // Packet count
+  } else {
+    tsiz_reg |= (1u << 19u);               // Packet count
+  }
 
   // Clear EP NAK mode & Enable EP transmitting.
   ctl_reg |= DxEPCTLx_BIT_CNAK | DxEPCTLx_BIT_EPENA;
@@ -1587,11 +1641,25 @@ static void DWC_EP_OutProcess(void)
 
     // Handle OUT transaction complete
     if (SL_IS_BIT_SET(ep_int_stat, DOEPINTx_BIT_XFRC)) {
+      uint16_t byte_cnt;
+
       sl_usbd_core_endpoint_read_complete(ep_log_nbr);
 
       // Save size of data received
       uint32_t size_rem = *doep_tsiz_ptr & DOEPTSIZx_XFRSIZ_MSK;
-      uint16_t byte_cnt = usbd_driver_data.EP_MaxPktSize[ep_phy_nbr] - size_rem;
+
+      uint32_t ep_type = (*doep_ctl_ptr >> 18u) & 0x03u;
+
+      if (ep_type == SL_USBD_ENDPOINT_TYPE_BULK) {
+        // Bulk OUT supports transfer-level operation. The payload size in memory is equal to
+        // "application-programmed initial transfer size – core updated final transfer size".
+        // .EP_AppBufLen[] is used in sli_usbd_driver_endpoint_rx_start() to save the initial app
+        // transfer size.
+        byte_cnt = usbd_driver_data.EP_AppBufLen[ep_phy_nbr] - size_rem;
+      } else {
+        byte_cnt = usbd_driver_data.EP_MaxPktSize[ep_phy_nbr] - size_rem;
+      }
+
       usbd_driver_data.EP_PktXferLen[ep_phy_nbr] += byte_cnt;
 
       if (ep_log_nbr == 0) {

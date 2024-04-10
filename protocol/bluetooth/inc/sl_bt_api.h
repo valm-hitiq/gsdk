@@ -882,34 +882,38 @@ typedef struct sl_bt_evt_system_hardware_error_s sl_bt_evt_system_hardware_error
  ******************************************************************************/
 PACKSTRUCT( struct sl_bt_evt_system_resource_exhausted_s
 {
-  uint8_t num_buffers_discarded;          /**< The system has temporarily run
-                                               out of the pre-allocated data
-                                               buffers that are allocated based
-                                               on SL_BT_CONFIG_BUFFER_SIZE
-                                               configuration and some expendable
-                                               data or event had to be discarded
-                                               to satisfy a non-expendble buffer
-                                               allocation. A typical case is
-                                               discarding scan reports when a
-                                               large inflow of scan reports
-                                               exceeds the speed at which the
-                                               application drains the BGAPI
-                                               event queue. */
-  uint8_t num_buffer_allocation_failures; /**< The system has run out of the
-                                               pre-allocated data buffers that
-                                               are allocated based on
-                                               SL_BT_CONFIG_BUFFER_SIZE
-                                               configuration and a buffer
-                                               allocation has failed. */
-  uint8_t num_heap_allocation_failures;   /**< The Bluetooth stack has failed to
-                                               make an allocation from the heap.
-                                               Note that only allocations made
-                                               by the Bluetooth stack are
-                                               detected and reported by this
-                                               field. Allocation failures in
-                                               other components that use
-                                               sl_malloc() or malloc() are not
-                                               included in this count. */
+  uint8_t num_buffers_discarded;           /**< The system has temporarily run
+                                                out of the pre-allocated data
+                                                buffers that are allocated based
+                                                on SL_BT_CONFIG_BUFFER_SIZE
+                                                configuration and some
+                                                expendable data or event had to
+                                                be discarded to satisfy a
+                                                non-expendble buffer allocation.
+                                                A typical case is discarding
+                                                scan reports when a large inflow
+                                                of scan reports exceeds the
+                                                speed at which the application
+                                                drains the BGAPI event queue. */
+  uint8_t num_buffer_allocation_failures;  /**< The system has run out of the
+                                                pre-allocated data buffers that
+                                                are allocated based on
+                                                SL_BT_CONFIG_BUFFER_SIZE
+                                                configuration and a buffer
+                                                allocation has failed. */
+  uint8_t num_heap_allocation_failures;    /**< The Bluetooth stack has failed
+                                                to make an allocation from the
+                                                heap. Note that only allocations
+                                                made by the Bluetooth stack are
+                                                detected and reported by this
+                                                field. Allocation failures in
+                                                other components that use
+                                                sl_malloc() or malloc() are not
+                                                included in this count. */
+  uint8_t num_message_allocation_failures; /**< The system has run out of
+                                                internal pre-allocated message
+                                                items and the creation of an
+                                                internal message has failed. */
 });
 
 typedef struct sl_bt_evt_system_resource_exhausted_s sl_bt_evt_system_resource_exhausted_t;
@@ -2310,12 +2314,11 @@ sl_status_t sl_bt_advertiser_set_channel_map(uint8_t advertising_set,
  * goes over the global value that was set using the @ref
  * sl_bt_system_set_tx_power command, the global value will be the maximum
  * limit. The maximum TX power of legacy advertising is further constrained to
- * be less than +10 dBm. Extended advertising TX power can be +10 dBm and over
- * if Adaptive Frequency Hopping is enabled. This setting has no effect on
- * periodic advertising.
+ * be less than +10 dBm. The extended advertising and periodic advertising TX
+ * power can be +10 dBm and over if Adaptive Frequency Hopping is enabled.
  *
- * This setting will take effect next time the legacy or extended advertising is
- * enabled.
+ * This setting will take effect next time the legacy, extended or periodic
+ * advertising is enabled.
  *
  * By default, maximum advertising TX power is limited by the global value.
  *

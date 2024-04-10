@@ -48,6 +48,15 @@
 #include "sl_assert.h"
 #include "em_device.h"
 
+#if (SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP)
+  #include "sl_component_catalog.h"
+  #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+    #include "sl_power_manager.h"
+  #else
+    #error "The 'Power Manager' component must be included in the project"
+  #endif // SL_CATALOG_POWER_MANAGER_PRESENT
+#endif // SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP
+
 //------------------------------------------------------------------------------
 // Defines
 
@@ -58,14 +67,9 @@
 // seriously bad state and cannot be initialized properly.
 #define MAX_INITIALIZATION_ATTEMPTS (4)
 
-//------------------------------------------------------------------------------
-// Constants
-
-static const block_t trng_fifo_block = {
-  .addr = (uint8_t *)ADDR_BA431_FIFO,
-  .len = 0,
-  .flags = BLOCK_S_CONST_ADDR
-};
+// Magic word written to the random data buffer in RAM. Used as a basic sanity
+// check to make sure that the data actually has been retained during sleep.
+#define BUFFERED_RANDOMNESS_MAGIC_WORD (0xF55E0830)
 
 //------------------------------------------------------------------------------
 // Forward Declarations
@@ -73,8 +77,34 @@ static const block_t trng_fifo_block = {
 static void cryptoacc_trng_get_random_wrapper(void *unused_state,
                                               block_t output);
 
+#if SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP
+
+static void store_trng_fifo_data(sl_power_manager_em_t from,
+                                 sl_power_manager_em_t to);
+
+#endif // SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP
+
 //------------------------------------------------------------------------------
-// Global Data
+// Static Constants
+
+static const block_t trng_fifo_block = {
+  .addr = (uint8_t *)ADDR_BA431_FIFO,
+  .len = 0,
+  .flags = BLOCK_S_CONST_ADDR,
+};
+
+#if SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP
+
+static const sl_power_manager_em_transition_event_info_t buffer_trng_data_event = {
+  .event_mask = SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM2
+                | SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM3,
+  .on_event = store_trng_fifo_data,
+};
+
+#endif // SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP
+
+//------------------------------------------------------------------------------
+// Global Constants
 
 const struct sx_rng sli_cryptoacc_trng_wrapper = {
   .param = NULL,
@@ -82,7 +112,82 @@ const struct sx_rng sli_cryptoacc_trng_wrapper = {
 };
 
 //------------------------------------------------------------------------------
+// Static Variables
+
+#if SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP
+
+static sl_power_manager_em_transition_event_handle_t buffer_trng_handle = { 0 };
+
+// Keep all of the buffered randomness in the .bss section. Powering down the
+// RAM bank containing this section would be a clear user error. We prefer to
+// not use the heap for this data since the heap section expands (based on the
+// linkerfile) into RAM banks that technically would be OK to power down.
+static uint32_t buffered_randomness[SL_VSE_MAX_TRNG_WORDS_BUFFERED_DURING_SLEEP + 1]
+  = { 0 };
+static size_t n_buffered_random_bytes = 0;
+
+#endif // SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP
+
+//------------------------------------------------------------------------------
 // Static Function Definitions
+
+#if SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP
+
+/*
+ * \brief
+ *   Callback function for buffering all bytes currently in the TRNG FIFO.
+ *
+ * \details
+ *   Will be called by the Power Manager on EM2/EM3 entry. Before this function
+ *   returns, it will unsubscribe to the Power Manager event that caused it to
+ *   trigger.
+ *
+ * \attention
+ *   This function will disable the TRNG (NDRBG).
+ */
+static void store_trng_fifo_data(sl_power_manager_em_t from,
+                                 sl_power_manager_em_t to)
+{
+  (void)to;
+  (void)from;
+
+  // It should be safe to assume that the CRYPTOACC resource won't be acquired
+  // by anyone when we're entering EM2/EM2.
+  if (cryptoacc_management_acquire() != PSA_SUCCESS) {
+    return;
+  }
+
+  // We don't want the TRNG to start refilling the FIFO after we've read all of
+  // the remaining data (since we'll necessarily go below the refill threshold).
+  ba431_disable_ndrng();
+
+  block_t buffered_randomness_block =
+    block_t_convert(buffered_randomness,
+                    SX_MIN(sizeof(uint32_t) * ba431_read_fifolevel(),
+                           SL_VSE_MAX_TRNG_WORDS_BUFFERED_DURING_SLEEP * sizeof(uint32_t)));
+
+  memcpy_blk(buffered_randomness_block,
+             trng_fifo_block,
+             buffered_randomness_block.len);
+
+  if (cryptoacc_management_release() != PSA_SUCCESS) {
+    return;
+  }
+
+  n_buffered_random_bytes = buffered_randomness_block.len;
+
+  // Write a magic word to the end of the RAM buffer. This will be checked
+  // before the buffered data is used, as a basic sanity check that the data was
+  // actually retained in EM2/EM3.
+  buffered_randomness[SL_VSE_MAX_TRNG_WORDS_BUFFERED_DURING_SLEEP]
+    = BUFFERED_RANDOMNESS_MAGIC_WORD;
+
+  // We are no longer interested in knowing if the device goes to sleep now that
+  // we have buffered the TRNG data.
+  sl_power_manager_unsubscribe_em_transition_event(&buffer_trng_handle);
+}
+
+#endif // SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP
 
 static psa_status_t wait_until_trng_is_ready_for_sleep(void)
 {
@@ -156,7 +261,7 @@ static psa_status_t initialize_trng(void)
     }
 
     // The implementation of sx_trng_get_rand_blk() doesn't actually assert
-    // that the startup check passed succesfully (only that the TRNG is no
+    // that the startup check passed successfully (only that the TRNG is no
     // longer in a reset- or startup state). Therefore, we will implement our
     // own functions for waiting until the startup has completed and then
     // getting randomness from the TRNG FIFO.
@@ -164,7 +269,7 @@ static psa_status_t initialize_trng(void)
       continue;
     }
 
-    // When we reach this point, the TRNG has started succesfully and is ready
+    // When we reach this point, the TRNG has started successfully and is ready
     // to be used.
     return PSA_SUCCESS;
   }
@@ -199,13 +304,56 @@ static bool trng_needs_initialization(void)
 
 static psa_status_t cryptoacc_trng_get_random(block_t output)
 {
+  EFM_ASSERT(!(output.flags & BLOCK_S_CONST_ADDR));
+
+  #if SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP
+  // Service as much of the request as possible from the already collected
+  // randomness which was buffered when EM2/EM3 was entered previously.
+  if ((n_buffered_random_bytes > 0)
+      && (buffered_randomness[SL_VSE_MAX_TRNG_WORDS_BUFFERED_DURING_SLEEP]
+          == BUFFERED_RANDOMNESS_MAGIC_WORD)) {
+    block_t chunk_block = block_t_convert(output.addr,
+                                          SX_MIN(output.len,
+                                                 n_buffered_random_bytes));
+    uint8_t *start_of_unused_randomness
+      = (uint8_t *)buffered_randomness
+        + SL_VSE_MAX_TRNG_WORDS_BUFFERED_DURING_SLEEP * sizeof(uint32_t)
+        - n_buffered_random_bytes;
+    block_t buffered_randomness_block =
+      block_t_convert(start_of_unused_randomness, n_buffered_random_bytes);
+    memcpy_blk(chunk_block, buffered_randomness_block, chunk_block.len);
+
+    n_buffered_random_bytes -= chunk_block.len;
+    output.len -= chunk_block.len;
+    output.addr += chunk_block.len;
+
+    if (n_buffered_random_bytes == 0) {
+      // Remove the magic word from RAM.
+      buffered_randomness[SL_VSE_MAX_TRNG_WORDS_BUFFERED_DURING_SLEEP] = 0;
+    }
+    if (output.len == 0) {
+      return PSA_SUCCESS;
+    }
+  }
+  #endif // SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP
+
   if (trng_needs_initialization()) {
-    // In addition to configuring the TRNG, this funtion will also wait until
+    // In addition to configuring the TRNG, this function will also wait until
     // the hardware is fully ready for usage.
     psa_status_t status = initialize_trng();
     if (status != PSA_SUCCESS) {
       return status;
     }
+
+    #if SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP
+    // Now that we have initialized the TRNG, we know that its FIFO level will
+    // never go below the threshold level (outside of the duration of this
+    // function). In order to avoid wasting already generated random words, we
+    // will now register a callback function for storing randomness on EM2/EM3
+    // entry.
+    sl_power_manager_subscribe_em_transition_event(&buffer_trng_handle,
+                                                   &buffer_trng_data_event);
+    #endif // SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP
   }
 
   size_t n_bytes_generated = 0;
@@ -222,7 +370,12 @@ static psa_status_t cryptoacc_trng_get_random(block_t output)
 
   // Potential bad states reached by the TRNG during the above randomness
   // generation will be handled by this function.
-  return wait_until_trng_is_ready_for_sleep();
+  psa_status_t status = wait_until_trng_is_ready_for_sleep();
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+
+  return PSA_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -238,7 +391,7 @@ static psa_status_t cryptoacc_trng_get_random(block_t output)
  *   compilation units as well.
  *
  * \note
- *   This function does not assume any responsibility to aquire and release
+ *   This function does not assume any responsibility to acquire and release
  *   ownership of the CRYPTOACC peripheral.
  *
  * \warning

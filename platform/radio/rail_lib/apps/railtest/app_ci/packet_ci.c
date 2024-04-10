@@ -366,6 +366,20 @@ RAIL_Status_t RAILCb_SetupRxFifo(RAIL_Handle_t railHandle)
   return status;
 }
 
+void setTxFifo(sl_cli_command_arg_t *args)
+{
+  uint16_t reqFifoBytes = sl_cli_get_argument_uint16(args, 0);
+  uint16_t actFifoBytes = configureTxFifo(reqFifoBytes);
+  if (reqFifoBytes == 0U) {
+    reqFifoBytes = actFifoBytes;
+  }
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "TxFifoBytes:%u,Success:%s",
+                actFifoBytes,
+                (((actFifoBytes > 0U) && (actFifoBytes == reqFifoBytes))
+                 ? "True" : "False"));
+}
+
 void fifoModeTestOptions(sl_cli_command_arg_t *args)
 {
   char *outputStr[] = { "Disabled", "Enabled" };

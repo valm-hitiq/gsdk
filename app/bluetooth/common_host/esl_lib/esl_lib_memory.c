@@ -78,7 +78,7 @@ void *_esl_lib_malloc(size_t size, const char *file, uint32_t line)
     // Push it to the list
     sl_slist_push(&list, &item->node);
     if (item->file[8] != 'e') { // event list allocations excluded
-      esl_lib_log_debug(LOG_MODULE, "%8p Size = %zu allocated in %s:%u" APP_LOG_NL,
+      esl_lib_log_debug(LOG_MODULE, ESL_LIB_LOG_HANDLE_FORMAT " Size = %zu allocated in %s:%u" APP_LOG_NL,
                         item->ptr,
                         item->size,
                         item->file,
@@ -99,7 +99,7 @@ void _esl_lib_free(void *ptr, const char *file, uint32_t line)
     // Remove from the list
     sl_slist_remove(&list, &item->node);
     if (item->file[8] != 'e') { // events excluded
-      esl_lib_log_debug(LOG_MODULE, "%8p Size = %zu freed in %s:%u" APP_LOG_NL,
+      esl_lib_log_debug(LOG_MODULE, ESL_LIB_LOG_HANDLE_FORMAT " Size = %zu freed in %s:%u" APP_LOG_NL,
                         item->ptr,
                         item->size,
                         item->file,
@@ -109,6 +109,11 @@ void _esl_lib_free(void *ptr, const char *file, uint32_t line)
     free(ptr);
     // Free list item
     free(item);
+  } else {
+    esl_lib_log_critical(LOG_MODULE, "Unknown free request for " ESL_LIB_LOG_HANDLE_FORMAT " in %s:%u" APP_LOG_NL,
+                         ptr,
+                         file,
+                         line);
   }
 }
 

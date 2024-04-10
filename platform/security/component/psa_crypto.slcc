@@ -60,7 +60,6 @@ requires:
     condition: [device_series_2]
   - name: psa_crypto_common
   - name: sl_si91x_psa_crypto
-    from: wiseconnect3_sdk
     condition: [device_si91x]
 
   # Inclusion of source and config components depends on which TZ state we are

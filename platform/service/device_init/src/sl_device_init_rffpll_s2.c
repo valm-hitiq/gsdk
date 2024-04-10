@@ -62,7 +62,7 @@ sl_device_init_rffpll_config_t rffpll_band_config_39MHz[] = {
   { 97500000, 23, 7, 115 }, // Band 780 MHz
   { 97500000, 20, 6, 100 }, // Band 863 MHz
   { 97500000, 23, 7, 115 }, // Band 896 MHz
-  { 96520000, 20, 6, 99 },  // Band 928 MHz
+  { 97500000, 23, 7, 115 },  // Band 928 MHz
   { 97500000, 20, 6, 100 }  // Band 9xx MHz (covers from 901 to 928 MHz)
 };
 

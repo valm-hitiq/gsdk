@@ -39,6 +39,8 @@
 #include "sl_wisun_app_core_util.h"
 #include "sl_wisun_types.h"
 #include "sl_wisun_api.h"
+#include "sl_wisun_trace_util.h"
+
 #if SL_FTP_ENABLE_TFTP_PROTOCOL
 #include "sl_tftp_clnt.h"
 #endif
@@ -224,30 +226,31 @@ int32_t sl_tftp_udp_recvfrom(int32_t sockid, void *buff, uint32_t len, void *src
   return recvfrom(sockid, buff, len, 0L, (struct sockaddr *)src_addr, &addr_len);
 }
 
-void sl_tftp_udp_get_addr_bytes(const char *host,
-                                uint16_t port,
-                                void * const dst,
-                                size_t dst_size)
+
+void * sl_tftp_udp_get_addr(const char *host,
+                            uint16_t port)
 {
-  sockaddr_in6_t waddr = { 0U };
+  sockaddr_in6_t *waddr = NULL;
 
-  if (dst == NULL || !dst_size) {
-    return;
+  waddr = (sockaddr_in6_t *)app_wisun_malloc(sizeof(sockaddr_in6_t));
+  if (waddr == NULL) {
+    return NULL;
   }
 
-  if (inet_pton(AF_INET6, host,
-                &waddr.sin6_addr) == SOCKET_RETVAL_ERROR) {
-    memset(dst, 0U, dst_size);
+  if (inet_pton(AF_INET6, host, &waddr->sin6_addr) == SOCKET_RETVAL_ERROR) {
+    app_wisun_free(waddr);
+    return NULL;
   }
 
-  waddr.sin6_family = AF_INET6;
-  waddr.sin6_port = port;
+  waddr->sin6_family = AF_INET6;
+  waddr->sin6_port = port;
 
-  if (dst_size < sizeof(sockaddr_in6_t)) {
-    memset(dst, 0U, dst_size);
-  } else {
-    memcpy(dst, &waddr, sizeof(sockaddr_in6_t));
-  }
+  return (void *)waddr;
 }
 
+void sl_tftp_udp_free_addr(void *addr)
+{
+  app_wisun_free(addr);
+}
+               
 #endif

@@ -271,17 +271,22 @@ int32_t sl_tftp_udp_sendto(int32_t sockid, const void *buff, uint32_t len, const
 int32_t sl_tftp_udp_recvfrom(int32_t sockid, void *buff, uint32_t len, void *src_addr);
 
 /**************************************************************************//**
- * @brief Get UDP address bytes
- * @details Create address bytes from host string and port
+ * @brief Get UDP address structure
+ * @details Allocate address structue and set host address and port
  * @param[in] host Host string
  * @param[in] port Port
- * @param[in,out] dst Destiantion ptr
- * @param[in] dst_size Destination size
+ * @return void * Address structure
  *****************************************************************************/
-void sl_tftp_udp_get_addr_bytes(const char *host,
-                                uint16_t port,
-                                void * const dst,
-                                size_t dst_size);
+void * sl_tftp_udp_get_addr(const char *host,
+                            uint16_t port);
+
+/**************************************************************************//**
+ * @brief Free address
+ * @details Release the allocated address strcutre
+ * @param[in] addr Address structure
+ *****************************************************************************/
+void sl_tftp_udp_free_addr(void *addr);
+
 #endif
 
 #ifdef __cplusplus

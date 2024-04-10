@@ -54,6 +54,7 @@ typedef enum {
   ESL_LIB_IMAGE_TRANSFER_STATE_INIT_IN_PROGRESS,
   ESL_LIB_IMAGE_TRANSFER_STATE_IDLE,
   ESL_LIB_IMAGE_TRANSFER_STATE_BUSY,
+  ESL_LIB_IMAGE_TRANSFER_STATE_ERROR,
   ESL_LIB_IMAGE_TRANSFER_REMOVED
 } esl_image_transfer_state_t;
 
@@ -128,6 +129,14 @@ sl_status_t esl_lib_image_transfer_init(uint8_t                                 
                                         esl_lib_image_transfer_finished_callback_t finish_callback,
                                         esl_lib_ots_gattdb_handles_t               *gattdb_handles,
                                         esl_lib_image_transfer_handle_t            *handle_out);
+
+/***************************************************************************//**
+ * Discard and clanup transfer by handle
+ * @note Call only if `sl_bt_evt_connection_closed_id` event can't be expected!
+ * @param[in] handle  Pointer to an ESL Image Transfer handle.
+ * @return Status of the operation
+ ******************************************************************************/
+sl_status_t esl_lib_image_dump_transfer_by_handle(esl_lib_image_transfer_handle_t *handle);
 
 /***************************************************************************//**
  * Read object type

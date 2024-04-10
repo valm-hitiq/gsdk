@@ -564,6 +564,7 @@ void security_decrypt_packet(char *src, char *dst, unsigned *len)
 
   // remove tag and counter value
   *len = *len - NCP_SEC_PAYLOAD_OVERHEAD;
+  new_length += 4;
 
   //verify counter to prevent replay attacks
   conn_nonce_t nonce;
@@ -591,7 +592,7 @@ void security_decrypt_packet(char *src, char *dst, unsigned *len)
                                     auth_data, 7,
                                     (uint8_t *)dst, (uint8_t *)src + *len);
   if (err) {
-    app_log_warning("Packet decryption failed 0x%x" APP_LOG_NL, err);
+    app_log_warning("Packet decryption failed 0x%x, len: %u/%u" APP_LOG_NL, err, *len, new_length);
     *len = 0;
     return;
   }

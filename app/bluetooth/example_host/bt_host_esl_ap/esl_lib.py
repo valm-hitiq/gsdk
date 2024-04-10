@@ -84,6 +84,10 @@ def get_enum(prefix, index):
     except KeyError:
         return f'Unknown {index} ({hex(index)})'
 
+def get_sl_status_str(index):
+    '''Return string for an sl_status_t index'''
+    return get_enum('SL_STATUS_', index)
+
 def event_factory(evt_code: elw.esl_lib_evt_type_t, evt_data: elw.esl_lib_evt_data_t):
     '''Transform ctype object to specific class instance'''
     evt_class_list = [
@@ -260,7 +264,7 @@ class EventConfigureTagResponse():
 
     def __repr__(self) -> str:
         type_str = get_enum('ESL_LIB_DATA_TYPE_', self.type)
-        status_str = get_enum('SL_STATUS_', self.status)
+        status_str = get_sl_status_str(self.status)
         return f'{self.evt_code}, {self.connection_handle}, {type_str}, {status_str}'
 
 class EventControlPointResponse():
@@ -273,7 +277,7 @@ class EventControlPointResponse():
         self.data_sent = array_to_bytes(evt_data.evt_control_point_response.data_sent)
 
     def __repr__(self) -> str:
-        status_str = get_enum('SL_STATUS_', self.status)
+        status_str = get_sl_status_str(self.status)
         return f'{self.evt_code}, {self.connection_handle}, {status_str}, {self.data_sent.hex()}'
 
 class EventControlPointNotification():
@@ -295,10 +299,12 @@ class EventConnectionOpened():
         self.connection_handle = ConnectionHandle(evt_data.evt_connection_opened.connection_handle)
         self.address = Address.from_ctype(evt_data.evt_connection_opened.address)
         self.gattdb_handles = elw.esl_lib_gattdb_handles_t.from_buffer_copy(evt_data.evt_connection_opened.gattdb_handles)
+        self.status = evt_data.evt_connection_opened.status
 
     def __repr__(self) -> str:
-        gattdb_str = f'[{self.gattdb_handles.services.esl}, {self.gattdb_handles.services.ots}, {self.gattdb_handles.services.dis}]'
-        return f'{self.evt_code}, {self.connection_handle}, {self.address}, {gattdb_str}'
+        gattdb_str = f'[{hex(self.gattdb_handles.services.esl)}, {hex(self.gattdb_handles.services.ots)}, {hex(self.gattdb_handles.services.dis)}]'
+        status_str = get_sl_status_str(self.status)
+        return f'{self.evt_code}, {self.connection_handle}, {self.address}, {status_str}, {gattdb_str}'
 
 class EventConnectionRetry():
     '''Wrapper for esl_lib_evt_connection_retry_t'''
@@ -312,7 +318,7 @@ class EventConnectionRetry():
         self.retries_left = evt_data.evt_connection_retry.retries_left
 
     def __repr__(self) -> str:
-        reason_str = get_enum('SL_STATUS_', self.reason)
+        reason_str = get_sl_status_str(self.reason)
         state_str = get_enum('ESL_LIB_CONNECTION_STATE_',self.connection_state)
         return f'{self.evt_code}, {self.connection_handle}, {reason_str}, {state_str}, {self.address}, {self.retries_left}'
 
@@ -326,7 +332,7 @@ class EventConnectionClosed():
         self.reason = evt_data.evt_connection_closed.reason
 
     def __repr__(self) -> str:
-        reason_str = get_enum('SL_STATUS_', self.reason)
+        reason_str = get_sl_status_str(self.reason)
         return f'{self.evt_code}, {self.connection_handle}, {self.address}, {reason_str}'
 
 class EventBondingData():
@@ -362,7 +368,7 @@ class EventImageTransferFinished():
         self.status = evt_data.evt_image_transfer_finished.status
 
     def __repr__(self) -> str:
-        status_str = get_enum('SL_STATUS_', self.status)
+        status_str = get_sl_status_str(self.status)
         return f'{self.evt_code}, {self.connection_handle}, {self.img_index}, {status_str}'
 
 class EventImageType():
@@ -432,7 +438,7 @@ class EventError():
 
     def __repr__(self) -> str:
         lib_status_str = get_enum('ESL_LIB_STATUS_', self.lib_status)
-        sl_status_str = get_enum('SL_STATUS_', self.sl_status)
+        sl_status_str = get_sl_status_str(self.sl_status)
         try:
             if isinstance(self.node_id, ConnectionHandle) or isinstance(self.node_id, (Address)):
                 # Connection handle node ID type
@@ -534,7 +540,7 @@ class Lib():
             except BrokenPipeError as err:
                 raise CommandFailedError('Lib process terminated unexpectedly') from err
             if result[0]:
-                raise CommandFailedError(f'{command[1:]} failed with result: {get_enum("SL_STATUS_", result[0])}', result[0])
+                raise CommandFailedError(f'{command[1:]} failed with result: {get_sl_status_str(result[0])}', result[0])
             return result
 
     def stop(self, timeout=3):

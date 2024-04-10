@@ -620,6 +620,15 @@ template_contribution:
 
   - name: cli_command
     value:
+      name: setTxFifo
+      handler: setTxFifo
+      help: "Set the transmit buffer length."
+      argument:
+        - type: uint16
+          help: "lengthBytes: range 64-TX_BUFFER_SIZE, 0 for default size"
+
+  - name: cli_command
+    value:
       name: setTxFifoThreshold
       handler: setTxFifoThreshold
       help: "Set the TX FIFO Almost Empty threshold."

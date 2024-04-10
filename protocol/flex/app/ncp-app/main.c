@@ -14,7 +14,7 @@
  *
  ******************************************************************************/
 
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include "sl_component_catalog.h"
 #include "sl_system_init.h"
 #include "app_framework_common.h"
@@ -40,11 +40,11 @@ RAIL_Status_t RAILCb_SetupRxFifo(RAIL_Handle_t railHandle)
   if (!rail_rx_fifo_is_initialized) {
     uint16_t rxFifoSize = RAIL_RX_FIFO_SIZE;
     phy_rx_fifo = (uint8_t *)malloc(rxFifoSize);
-    assert(phy_rx_fifo != NULL);
-    assert(RAIL_SetRxFifo(railHandle, &phy_rx_fifo[0], &rxFifoSize)
-           == RAIL_STATUS_NO_ERROR);
+    CONNECT_STACK_ASSERT(phy_rx_fifo != NULL);
+    CONNECT_STACK_ASSERT(RAIL_SetRxFifo(railHandle, &phy_rx_fifo[0], &rxFifoSize)
+                         == RAIL_STATUS_NO_ERROR);
     // Check that the allocated memory size in RAIL corresponds to what we want
-    assert(rxFifoSize == RAIL_RX_FIFO_SIZE);
+    CONNECT_STACK_ASSERT(rxFifoSize == RAIL_RX_FIFO_SIZE);
     rail_rx_fifo_is_initialized = true;
   }
   return RAIL_STATUS_NO_ERROR;

@@ -115,5 +115,5 @@ endif
 
 ifeq ($(OS), win)
   # Ws2_32: WinSock library
-  override LDFLAGS += -lWs2_32
+  override LDFLAGS += -lWs2_32 -lcrypt32
 endif

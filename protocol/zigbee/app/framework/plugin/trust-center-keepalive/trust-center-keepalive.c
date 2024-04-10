@@ -578,8 +578,19 @@ static void initiateSearchForNewNetworkWithTrustCenter(void)
     // Activate TC-connectivity based beacon prioritization, we won't deactivate it later
     param.beaconClassificationMask |= PRIORITIZE_BEACONS_BASED_ON_TC_CONNECTVITY;
     emberSetBeaconClassificationParams(&param);
+
+    // Allow the upper layer to update the rejoin mask incase needed in this callback.
+    // Why do we need this callback - in SE 1.4 CCB 2637 introduced a device type that is slightly
+    // different Multi-MAC Selection device called as the Multi-MAC Joining device.
+    // The Joining Device shall not change the interface during rejoin but the selection device can.
+    // Since this code is in library of the leaf node with the folloiwng callback it would be able
+    // update mask for rejoining based on the above device types.
+    uint32_t rejoinChannelMask = EMBER_ALL_802_15_4_CHANNELS_MASK;
+#ifdef SL_CATALOG_ZIGBEE_PHY_2_4_SUBGHZ_JOINING_END_DEVICE_PRESENT
+    emberUpdateMultiMacRejoinChannelMaskForSelectionOrJoiningDevice(&rejoinChannelMask);
+#endif //SL_CATALOG_ZIGBEE_PHY_2_4_SUBGHZ_JOINING_END_DEVICE_PRESENT
     status = emberFindAndRejoinNetworkWithReason(false, // TC (unsecured) rejoin
-                                                 EMBER_ALL_802_15_4_CHANNELS_MASK,
+                                                 rejoinChannelMask,
                                                  EMBER_AF_REJOIN_DUE_TO_TC_KEEPALIVE_FAILURE);
   } else {
     emberAfSecurityPrintln("Failed to suspend token writing");

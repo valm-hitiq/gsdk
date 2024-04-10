@@ -1544,13 +1544,15 @@ RAIL_Status_t RAIL_Wake(RAIL_Time_t elapsedTime);
  *
  * @return Status code indicating success of the function call.
  *
- * @note Call this function only when the application is built
- * and initialized with Power Manager plugin.
- * RAIL will perform timer synchronization, upon transitioning from EM2 or lower
- * to EM1 or higher energy mode or vice-versa, in the Power Manager EM
- * transition callback. Since EM transition callbacks are not called in a
- * deterministic order, it is suggested to not call any RAIL time dependent APIs
- * in an EM transition callback.
+ * @note This function must be called only when the application is built
+ *   and initialized with Power Manager plugin and when the radio is idle.
+ *   RAIL will perform timer synchronization, upon transitioning from EM2 or
+ *   lower to EM1 or higher energy mode or vice-versa, in the Power Manager EM
+ *   transition callback.
+ *
+ * @warning Since EM transition callbacks are not called in a deterministic
+ *   order, it is suggested to not call any RAIL time dependent APIs
+ *   in an EM transition callback.
  */
 RAIL_Status_t RAIL_InitPowerManager(void);
 

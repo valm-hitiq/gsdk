@@ -33,6 +33,7 @@
 
 #include "app_assert.h"
 #include "app_timer.h"
+#include "sl_sleeptimer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -63,12 +64,14 @@ static uint16_t start_level;
 /// target level of lightness transition
 static uint16_t target_level;
 
-/// lightness transition time in timer ticks
-static uint32_t level_transtime_ticks;
+/// lightness transition time in ms
+static uint32_t level_transtime_ms;
 /// time elapsed from lightness transition start
 static uint32_t level_transtime_elapsed;
 /// non-zero if lightness transition is active
 static uint8_t level_transitioning;
+/// timestamp of the last sleeptimer tick
+static uint64_t last_tick;
 
 static app_timer_t transition_timer;
 
@@ -99,6 +102,12 @@ static void transition_timer_cb(app_timer_t *handle,
   (void)data;
   (void)handle;
 
+  // Use sleeptimer to account for scheduling errors
+  uint64_t current_tick = sl_sleeptimer_get_tick_count64();
+  uint64_t period_ms = 0;
+  sl_sleeptimer_tick64_to_ms(current_tick - last_tick, &period_ms);
+  last_tick = current_tick;
+
   // Initialize the variable to UI update period in order to trigger a UI update
   // at the beginning of the transition.
   static uint16_t time_elapsed_since_ui_update =
@@ -109,9 +118,9 @@ static void transition_timer_cb(app_timer_t *handle,
     app_assert_status_f(sc, "Failed to stop Periodic Level Transition Timer");
     return;
   } else {
-    level_transtime_elapsed++;
+    level_transtime_elapsed += period_ms;
 
-    if (level_transtime_elapsed >= level_transtime_ticks) {
+    if (level_transtime_elapsed >= level_transtime_ms) {
       // transition complete
       level_transitioning = 0;
       current_level = target_level;
@@ -123,19 +132,19 @@ static void transition_timer_cb(app_timer_t *handle,
       // Trigger a UI update in order to provide the target values at the end
       // of the current transition
       sl_btmesh_lighting_server_on_ui_update(current_level);
-      sl_btmesh_update_lightness(current_level, level_transtime_ticks - level_transtime_elapsed);
+      sl_btmesh_update_lightness(current_level, level_transtime_ms - level_transtime_elapsed);
     } else {
       // calculate current PWM duty cycle based on elapsed transition time
       if (target_level >= start_level) {
         current_level = start_level
                         + (target_level - start_level)
                         * (uint64_t)level_transtime_elapsed
-                        / level_transtime_ticks;
+                        / level_transtime_ms;
       } else {
         current_level = start_level
                         - (start_level - target_level)
                         * (uint64_t)level_transtime_elapsed
-                        / level_transtime_ticks;
+                        / level_transtime_ms;
       }
 
       // When transition is ongoing generate an event to application once every
@@ -146,7 +155,7 @@ static void transition_timer_cb(app_timer_t *handle,
       if (SL_BTMESH_LIGHTING_SERVER_UI_UPDATE_PERIOD_CFG_VAL <= time_elapsed_since_ui_update) {
         time_elapsed_since_ui_update -= SL_BTMESH_LIGHTING_SERVER_UI_UPDATE_PERIOD_CFG_VAL;
         sl_btmesh_lighting_server_on_ui_update(current_level);
-        sl_btmesh_update_lightness(current_level, level_transtime_ticks - level_transtime_elapsed);
+        sl_btmesh_update_lightness(current_level, level_transtime_ms - level_transtime_elapsed);
       }
     }
   }
@@ -162,6 +171,8 @@ static void transition_timer_cb(app_timer_t *handle,
  ******************************************************************************/
 void sl_btmesh_lighting_set_level(uint16_t level, uint32_t transition_ms)
 {
+  // get last tick before running the first transition timer
+  last_tick = sl_sleeptimer_get_tick_count64();
   if (transition_ms == 0) {
     current_level = level;
 
@@ -177,7 +188,7 @@ void sl_btmesh_lighting_set_level(uint16_t level, uint32_t transition_ms)
     return;
   }
 
-  level_transtime_ticks = transition_ms;
+  level_transtime_ms = transition_ms;
 
   start_level = current_level;
   target_level = level;
@@ -193,6 +204,9 @@ void sl_btmesh_lighting_set_level(uint16_t level, uint32_t transition_ms)
                                    NO_CALLBACK_DATA,
                                    true);
   app_assert_status_f(sc, "Failed to start periodic Transition Timer");
+
+  // run first transition since the timer will not trigger now
+  transition_timer_cb(NULL, NULL);
 
   return;
 }

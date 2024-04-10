@@ -18,8 +18,8 @@
   - name: SL_BOARD_NAME
     value: '"BRD4001A"'
   - name: SL_BOARD_REV
-    value: '"A03"'
+    value: '"A02"'
 - tag:
   - board:pn:BRD4001
   - board:variant:A
-  - board:revision:A03
+  - board:revision:A02

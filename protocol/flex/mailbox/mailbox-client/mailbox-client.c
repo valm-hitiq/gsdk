@@ -28,7 +28,7 @@
  ******************************************************************************/
 
 #include <string.h>
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include "mailbox-client-config.h"
 
 #include "stack/include/ember.h"
@@ -192,7 +192,7 @@ void emAfPluginMailboxClientEventHandler(void)
                                                  0,      // tag
                                                  false); // moreMessages
   } else {
-    assert(0);
+    CONNECT_STACK_ASSERT(0);
   }
 }
 
@@ -302,7 +302,7 @@ static void addMessageCommandSentHandler(EmberStatus status,
                                          EmberNodeId server,
                                          EmberNodeId destination)
 {
-  assert(internalState == CLIENT_STATE_SUBMIT_PENDING);
+  CONNECT_STACK_ASSERT(internalState == CLIENT_STATE_SUBMIT_PENDING);
 
   if (tag == pendingMessageData.tag
       && destination == pendingMessageData.destination
@@ -371,7 +371,7 @@ static EmberStatus sendGetMessageCommand(EmberNodeId server,
 static void getMessageCommandSentHandler(EmberStatus status,
                                          EmberNodeId server)
 {
-  assert(internalState == CLIENT_STATE_CHECK_MAILBOX_PENDING);
+  CONNECT_STACK_ASSERT(internalState == CLIENT_STATE_CHECK_MAILBOX_PENDING);
 
   if (server == pendingMessageData.server) {
     if (status == EMBER_SUCCESS) {

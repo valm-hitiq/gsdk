@@ -545,6 +545,10 @@ class Tag():
             info += f" Product_ID: {self.pnp_product_id:#x} Product_version: {self.pnp_product_version:#x}"
         else:
             info += "Not available"
+        
+        if self.serial_number is not None:
+            info += f"\n{'Serial Number:':{justify_column}}"
+            info += str(self.serial_number)
 
         info += f"\n{'Last status:':{justify_column}}"
         bs_string = ", ".join([value for key, value in BASIC_STATE_STRINGS.items() if self.basic_state_flags & key])
@@ -564,20 +568,23 @@ class Tag():
             if evt.address == self.ble_address:
                 if self._connection_timer.is_alive():
                     self._connection_timer.cancel()
+                if self._advertising_timer.is_alive():
+                    self._advertising_timer.cancel()
+                self._advertising = False
                 self._past_timer.cancel()
                 self._past_initiated = False
                 self.connection_handle = evt.connection_handle
                 self.gattdb_handles = evt.gattdb_handles
                 self.pending_unassociate = False
+                if evt.status != elw.SL_STATUS_OK:
+                    self.log.error("Tag at address %s connected with failure: %s", self.ble_address,  esl_lib.get_sl_status_str(evt.status))
+                    return
                 if not self.provisioned:
                     self.log.info("Reading tag information from address %s", self.ble_address)
                     self.get_tag_info()
                 else:
                     self.log.info("Tag info already available, skipping discovery for %s", self.ble_address)
 
-                if self._advertising_timer.is_alive():
-                    self._advertising_timer.cancel()
-                self._advertising = False
                 if self.esl_address is None:
                     self.log.info("Registering ESL Tag at BLE address: %s", self.ble_address)
                 if self.provisioned:
@@ -595,14 +602,14 @@ class Tag():
             self._connection_timer.start()
             self._advertising = True  # necessary step for any connect requests to undetected advertisers!
             self.log.warning(
-                "Tag at BLE address: %s reconnecting, reason: %s, %s retries left: %d",
+                "Reconnect to %s addr., reason: %s, %s, %d more left",
                 self.ble_address,
                 esl_lib.get_enum("ESL_LIB_CONNECTION_STATE_", evt.connection_state),
-                esl_lib.get_enum("SL_STATUS_", evt.reason),
+                esl_lib.get_sl_status_str(evt.reason),
                 evt.retries_left,
             )
         elif isinstance(evt, esl_lib.EventConnectionClosed):
-            if evt.connection_handle == self.connection_handle:
+            if evt.connection_handle == self.connection_handle or evt.address == self.ble_address:
                 self._past_timer.cancel()
                 self.connection_handle = None
                 self._past_initiated = False
@@ -615,7 +622,7 @@ class Tag():
                     self.update_timestamps()
                 elif evt.reason == elw.SL_STATUS_BT_CTRL_CONNECTION_TERMINATED_BY_LOCAL_HOST:
                     self.__update_flags(BASIC_STATE_FLAG_SYNCHRONIZED, False)
-                self.log.info("Connection to %s closed with reason %s",self.ble_address, esl_lib.get_enum("SL_STATUS_",evt.reason))
+                self.log.info("Connection to %s closed with reason %s",self.ble_address, esl_lib.get_sl_status_str(evt.reason))
         elif isinstance(evt, esl_lib.EventTagInfo):
             if evt.connection_handle == self.connection_handle:
                 for ix, (tlv, value) in enumerate(evt.tlv_data.items()):

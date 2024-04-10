@@ -35,6 +35,10 @@
 #ifndef PLATFORM_EFR32_H_
 #define PLATFORM_EFR32_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <openthread/instance.h>
 
 #include "em_device.h"
@@ -197,5 +201,9 @@ bool efr32AllowSleepCallback(void);
 otError efr32RadioLoadChannelConfig(uint8_t aChannel, int8_t aTxPower);
 
 otError railStatusToOtError(RAIL_Status_t status);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // PLATFORM_EFR32_H_

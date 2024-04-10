@@ -28,7 +28,7 @@
  ******************************************************************************/
 
 #include <string.h>
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include "ota-broadcast-bootloader-server-config.h"
 
 #include "stack/include/ember.h"
@@ -625,9 +625,9 @@ uint8_t emGetOrSetTargetMiscInfo(uint16_t targetIndex,
   uint8_t *targetListBufferPtr;
   uint8_t retVal = 0;
 
-  assert(currentTargetListBuffer != EMBER_NULL_BUFFER
-         && emberGetBufferLength(currentTargetListBuffer)
-         >= (targetIndex + 1) * TARGET_LIST_ENTRY_LENGTH);
+  CONNECT_STACK_ASSERT(currentTargetListBuffer != EMBER_NULL_BUFFER
+                       && emberGetBufferLength(currentTargetListBuffer)
+                       >= (targetIndex + 1) * TARGET_LIST_ENTRY_LENGTH);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -660,9 +660,9 @@ uint8_t emGetOrSetTargetApplicationStatus(uint16_t targetIndex,
   uint8_t *targetListBufferPtr;
   uint8_t retVal = 0;
 
-  assert(currentTargetListBuffer != EMBER_NULL_BUFFER
-         && emberGetBufferLength(currentTargetListBuffer)
-         >= (targetIndex + 1) * TARGET_LIST_ENTRY_LENGTH);
+  CONNECT_STACK_ASSERT(currentTargetListBuffer != EMBER_NULL_BUFFER
+                       && emberGetBufferLength(currentTargetListBuffer)
+                       >= (targetIndex + 1) * TARGET_LIST_ENTRY_LENGTH);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -693,7 +693,7 @@ uint16_t emTargetLookup(EmberNodeId targetShortId)
   uint8_t *targetListBufferPtr;
   uint16_t i;
 
-  assert(currentTargetListBuffer != EMBER_NULL_BUFFER);
+  CONNECT_STACK_ASSERT(currentTargetListBuffer != EMBER_NULL_BUFFER);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -738,7 +738,7 @@ static void initTargetList(EmberNodeId *targetList, uint16_t targetListLength)
   uint16_t i;
   uint8_t *targetListBufferPtr;
 
-  assert(targetListBuffer != EMBER_NULL_BUFFER);
+  CONNECT_STACK_ASSERT(targetListBuffer != EMBER_NULL_BUFFER);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -797,7 +797,7 @@ bool currentBlockCompleted(void)
   uint8_t *segmentBitmaskBufferPtr;
   uint16_t i;
 
-  assert(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
+  CONNECT_STACK_ASSERT(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -829,7 +829,7 @@ static bool segmentIndexToBit(uint16_t segmentIndex)
   uint8_t *segmentBitmaskBufferPtr;
   bool ret;
 
-  assert(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
+  CONNECT_STACK_ASSERT(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -929,7 +929,7 @@ static void queryNextTargetForMissingSegments(void)
     lastSegmentIndex = getTotalSegmentsCount() - 1;
   }
 
-  assert(targetListBuffer != EMBER_NULL_BUFFER);
+  CONNECT_STACK_ASSERT(targetListBuffer != EMBER_NULL_BUFFER);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -1001,7 +1001,7 @@ static void scheduleImageDistributionProcessNextTask(bool newSegmentOrNewTarget)
         // querying process.
         nextSegmentOrTargetIndex = 0;
         stackErrorsCount = 0;
-        assert(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
+        CONNECT_STACK_ASSERT(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
         emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -1017,7 +1017,7 @@ static void scheduleImageDistributionProcessNextTask(bool newSegmentOrNewTarget)
 
         // Here we assert: if we started a new broadcast round we had at least
         // one active target.
-        assert(updateNextTargetIndex(false));
+        CONNECT_STACK_ASSERT(updateNextTargetIndex(false));
         internalState = STATE_OTA_SERVER_MISSING_SEGMENTS_UNICAST_INTERVAL;
       }
 
@@ -1074,7 +1074,7 @@ static void scheduleImageDistributionProcessNextTask(bool newSegmentOrNewTarget)
           nextSegmentOrTargetIndex = currentBlockIndex * MAX_SEGMENTS_IN_A_BLOCK;
           // We assert here: if we got here, there should be at least a segment
           // to be sent.
-          assert(updateNextSegmentIndex(false));
+          CONNECT_STACK_ASSERT(updateNextSegmentIndex(false));
 
           // If we reached the maximum broadcast rounds, fail distribution.
           if (currentBlockBroadcastRoundsCount
@@ -1099,7 +1099,7 @@ static void scheduleImageDistributionProcessNextTask(bool newSegmentOrNewTarget)
 
       break;
     default:
-      assert(0);
+      CONNECT_STACK_ASSERT(0);
   }
 }
 
@@ -1158,7 +1158,7 @@ static void initSegmentsBitmask(void)
 {
   uint8_t *segmentBitmaskBufferPtr;
 
-  assert(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
+  CONNECT_STACK_ASSERT(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -1177,7 +1177,7 @@ static void processMissingSegmentsBitmask(uint8_t *bitmask)
   uint8_t i;
   uint8_t *segmentBitmaskBufferPtr;
 
-  assert(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
+  CONNECT_STACK_ASSERT(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -1203,7 +1203,7 @@ static void queryNextTargetForTargetStatus(void)
   EmberNodeId destination;
   uint8_t *targetListBufferPtr;
 
-  assert(targetListBuffer != EMBER_NULL_BUFFER);
+  CONNECT_STACK_ASSERT(targetListBuffer != EMBER_NULL_BUFFER);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -1247,7 +1247,7 @@ static void queryNextTargetForTargetStatus(void)
 
 static void scheduleTargetStatusRequestProcessNextTask(bool newTarget)
 {
-  assert(serverInTargetStatusRequestProcess());
+  CONNECT_STACK_ASSERT(serverInTargetStatusRequestProcess());
 
   if (stackErrorsCount >= EMBER_AF_PLUGIN_OTA_BROADCAST_BOOTLOADER_SERVER_MAX_STACK_ERRORS) {
     targetsStatusRequestProcessFinished(EMBER_OTA_BROADCAST_BOOTLOADER_STATUS_STACK_ERROR);
@@ -1305,7 +1305,7 @@ static void requestNextTargetForBootload(void)
   EmberStatus status;
   uint32_t delayMs;
 
-  assert(targetListBuffer != EMBER_NULL_BUFFER);
+  CONNECT_STACK_ASSERT(targetListBuffer != EMBER_NULL_BUFFER);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -1358,7 +1358,7 @@ static void requestNextTargetForBootload(void)
 
 static void scheduleBootloadRequestProcessNextTask(bool newTarget)
 {
-  assert(serverInBootloadRequestProcess());
+  CONNECT_STACK_ASSERT(serverInBootloadRequestProcess());
 
   if (stackErrorsCount >= EMBER_AF_PLUGIN_OTA_BROADCAST_BOOTLOADER_SERVER_MAX_STACK_ERRORS) {
     bootloadRequestProcessFinished(EMBER_OTA_BROADCAST_BOOTLOADER_STATUS_STACK_ERROR);

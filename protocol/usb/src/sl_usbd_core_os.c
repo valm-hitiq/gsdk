@@ -64,12 +64,9 @@ static const osMessageQueueAttr_t message_queue_attr = {
   .mq_size    = 0
 };
 
-// parameters for event flags
-static osEventFlagsId_t     eventflags_handle[SL_USBD_OPEN_ENDPOINTS_QUANTITY];
-static osEventFlagsAttr_t   eventflags_attr[SL_USBD_OPEN_ENDPOINTS_QUANTITY];
-
-#define EVENT_FLAG_COMPLETE   0x1       // signal posted
-#define EVENT_FLAG_ABORT      0x2       // signal aborted
+// parameters for semaphore
+static osSemaphoreAttr_t    sem_attr[SL_USBD_OPEN_ENDPOINTS_QUANTITY];
+static osSemaphoreId_t      sem_id[SL_USBD_OPEN_ENDPOINTS_QUANTITY];
 
 // parameters for mutex
 static osMutexId_t          mutex_handle[SL_USBD_OPEN_ENDPOINTS_QUANTITY];
@@ -124,14 +121,13 @@ sl_status_t sli_usbd_core_os_create_endpoint_signal(uint8_t endpoint)
     return SL_STATUS_FAIL;
   }
 
-  eventflags_attr[endpoint].name       = "USBD events";
-  eventflags_attr[endpoint].attr_bits  = 0;
-  eventflags_attr[endpoint].cb_mem     = NULL;
-  eventflags_attr[endpoint].cb_size    = 0;
+  sem_attr[endpoint].name = "USBD semaphore";
+  sem_attr[endpoint].attr_bits = 0u;
+  sem_attr[endpoint].cb_mem = NULL;
+  sem_attr[endpoint].cb_size = 0;
 
-  eventflags_handle[endpoint] = osEventFlagsNew(&eventflags_attr[endpoint]);
-
-  if (eventflags_handle[endpoint] == NULL) {
+  sem_id[endpoint] = osSemaphoreNew(SL_USBD_OPEN_ENDPOINTS_QUANTITY, 0, &sem_attr[endpoint]);
+  if (sem_id[endpoint] == NULL) {
     return SL_STATUS_FAIL;
   }
 
@@ -147,11 +143,11 @@ sl_status_t sli_usbd_core_os_delete_endpoint_signal(uint8_t endpoint)
     return SL_STATUS_FAIL;
   }
 
-  if (osEventFlagsDelete(eventflags_handle[endpoint]) != osOK) {
+  if (osSemaphoreDelete(sem_id[endpoint]) != osOK) {
     return SL_STATUS_FAIL;
   }
 
-  eventflags_handle[endpoint] = NULL;
+  sem_id[endpoint] = NULL;
 
   return SL_STATUS_OK;
 }
@@ -163,7 +159,7 @@ sl_status_t sli_usbd_core_os_pend_endpoint_signal(uint8_t  endpoint,
                                                   uint16_t timeout_ms)
 {
   uint32_t ticks;
-  uint32_t status;
+  osStatus_t status;
 
   if (endpoint >= SL_USBD_OPEN_ENDPOINTS_QUANTITY) {
     return SL_STATUS_FAIL;
@@ -175,18 +171,14 @@ sl_status_t sli_usbd_core_os_pend_endpoint_signal(uint8_t  endpoint,
     ticks = usbd_core_os_ms_to_ticks(timeout_ms);
   }
 
-  status = osEventFlagsWait(eventflags_handle[endpoint], EVENT_FLAG_COMPLETE | EVENT_FLAG_ABORT, osFlagsWaitAny, ticks);
+  status = osSemaphoreAcquire(sem_id[endpoint], ticks);
 
-  if (status == osFlagsErrorTimeout) {
+  if (status == osErrorTimeout) {
     return SL_STATUS_TIMEOUT;
   }
 
-  if (status & osFlagsError) {
+  if (status != osOK) {
     return SL_STATUS_FAIL;
-  }
-
-  if ((status & EVENT_FLAG_ABORT) == EVENT_FLAG_ABORT) {
-    return SL_STATUS_ABORT;
   }
 
   return SL_STATUS_OK;
@@ -201,7 +193,7 @@ sl_status_t sli_usbd_core_os_abort_endpoint_signal(uint8_t endpoint)
     return SL_STATUS_FAIL;
   }
 
-  if (osEventFlagsSet(eventflags_handle[endpoint], EVENT_FLAG_ABORT) != osOK) {
+  if (osSemaphoreRelease(sem_id[endpoint]) != osOK) {
     return SL_STATUS_FAIL;
   }
 
@@ -217,7 +209,7 @@ sl_status_t sli_usbd_core_os_post_endpoint_signal(uint8_t endpoint)
     return SL_STATUS_FAIL;
   }
 
-  if (osEventFlagsSet(eventflags_handle[endpoint], EVENT_FLAG_COMPLETE) != osOK) {
+  if (osSemaphoreRelease(sem_id[endpoint]) != osOK) {
     return SL_STATUS_FAIL;
   }
 

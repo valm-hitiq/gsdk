@@ -106,10 +106,6 @@ typedef struct __attribute__((packed)) SApplicationConfiguration  // Must be pac
 
 static void WriteDefault(void);
 
-// Application file system
-static zpal_nvm_handle_t pFileSystemApplication;
-
-
 static void WriteDefaultApplicationConfiguration(void);
 static bool ObjectExist(zpal_nvm_object_key_t key);
 
@@ -127,8 +123,8 @@ static void
 SerialAPI_FileSystemMigrationManagement(void)
 {
   //Read present file system version file
-  uint32_t presentFilesysVersion;
-  uint32_t expectedFilesysVersion;  // This will hold the file system version that current SW will support.
+  uint32_t presentFilesysVersion = 0;
+  uint32_t expectedFilesysVersion = 0;  // This will hold the file system version that current SW will support.
 
   SerialAPI_GetZWVersion(&presentFilesysVersion);
 
@@ -153,17 +149,17 @@ SerialAPI_FileSystemMigrationManagement(void)
 
       //Get length of legacy file
       size_t   dataLen;
-      zpal_nvm_get_object_size(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &dataLen);
+      ZAF_nvm_app_get_object_size(FILE_ID_APPLICATIONCONFIGURATION, &dataLen);
 
       //Read legacy file to first members of tApplicationConfiguration
       SApplicationConfiguration_v7_15_3 tApplicationConfiguration = { 0 };
       // Initialize, since zpal_nvm_read() might fail.
-      zpal_nvm_read(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration, dataLen);
+      ZAF_nvm_app_read(FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration, dataLen);
 
       //Write default values to new members of tApplicationConfiguration and update the file.
       tApplicationConfiguration.radio_debug_enable = 0;
       tApplicationConfiguration.maxTxPower = 140;
-      zpal_status_t status = zpal_nvm_write(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration,
+      zpal_status_t status = ZAF_nvm_app_write(FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration,
           sizeof(tApplicationConfiguration));
       if (ZPAL_STATUS_OK == status)
       {
@@ -178,7 +174,7 @@ SerialAPI_FileSystemMigrationManagement(void)
       SApplicationConfiguration_V7_18_1 tApplicationConfiguration = { 0 };
       zpal_status_t status;
 
-      status = zpal_nvm_read(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration_v7_15_3,
+      status = ZAF_nvm_app_read(FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration_v7_15_3,
           sizeof(tApplicationConfiguration_v7_15_3));
       if (ZPAL_STATUS_OK != status)
       {
@@ -192,7 +188,7 @@ SerialAPI_FileSystemMigrationManagement(void)
         tApplicationConfiguration.radio_debug_enable = tApplicationConfiguration_v7_15_3.radio_debug_enable;
         tApplicationConfiguration.maxTxPower         = tApplicationConfiguration_v7_15_3.maxTxPower;
 
-        status = zpal_nvm_write(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration,
+        status = ZAF_nvm_app_write(FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration,
             sizeof(tApplicationConfiguration));  /* Do not use FILE_SIZE_APPLICATIONCONFIGURATION in
                                                   * migration functions, instead hard-code the size as
                                                   * sizes do change with FW upgrades. */

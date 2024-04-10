@@ -237,8 +237,8 @@ template_contribution:
   - name: component_catalog
     value: tflite_micro
 documentation:
-  docset: gecko-platform
-  document: machine-learning/tensorflow/overview
+  docset: machine-learning
+  document: machine-learning-tensorflow-lite-for-microcontrollers
 define:
   - name: TF_LITE_STATIC_MEMORY
 library:

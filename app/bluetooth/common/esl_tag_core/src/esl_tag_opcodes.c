@@ -3,7 +3,7 @@
  * @brief ESL Tag opcode processor implementation
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -29,6 +29,7 @@
  ******************************************************************************/
 #include <stdio.h>
 #include <stdbool.h>
+#include "sl_common.h"
 #include "esl_tag_log.h"
 #include "esl_tag_tlv.h"
 #include "esl_tag_core.h"

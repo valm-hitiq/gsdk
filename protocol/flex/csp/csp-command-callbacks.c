@@ -17,7 +17,7 @@
 // *** Generated file. Do not edit! ***
 // vNCP Version: 1.0
 
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include "stack/include/ember.h"
 
 #include "csp-format.h"
@@ -481,7 +481,7 @@ static void frequencyHoppingStartClientCompleteCommandHandler(uint8_t *callbackP
 void handleIncomingCallbackCommand(uint16_t commandId,
                                    uint8_t *callbackParams)
 {
-  assert(!isCurrentTaskStackTask());
+  CONNECT_STACK_ASSERT(!isCurrentTaskStackTask());
 
   switch (commandId) {
     case EMBER_STACK_STATUS_HANDLER_IPC_COMMAND_ID:

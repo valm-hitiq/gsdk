@@ -358,7 +358,7 @@ SECTIONS
 {% if trustzone_secure is not defined %}
 {%- if app_flash_start and app_flash_size %}
   app_flash_end = 0x{{ '%0x' % (app_flash_start) }} + 0x{{ '%0x' % (app_flash_size) }};
-  ASSERT( (linker_storage_end + SIZEOF(.internal_storage)) <= app_flash_end, "Internal storage is excessing the flash size !")
+  ASSERT( (linker_storage_begin + SIZEOF(.internal_storage)) <= app_flash_end, "Internal storage is excessing the flash size !")
 {%- endif %}
 {%- endif %} {#- trustzone_secure #}
 

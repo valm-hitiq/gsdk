@@ -28,7 +28,7 @@
  ******************************************************************************/
 
 #include <string.h>
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include "ota-broadcast-bootloader-client-config.h"
 
 #include "stack/include/ember.h"
@@ -191,7 +191,7 @@ static void initSegmentsBitmask(void)
 {
   uint8_t *segmentBitmaskBufferPtr;
 
-  assert(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
+  CONNECT_STACK_ASSERT(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -212,7 +212,7 @@ static bool getSegmentBit(uint16_t segmentIndex)
   uint8_t *segmentBitmaskBufferPtr;
   bool ret;
 
-  assert(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
+  CONNECT_STACK_ASSERT(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -234,7 +234,7 @@ static void setSegmentBit(uint16_t segmentIndex)
   uint8_t bitIndex = ((segmentIndex % MAX_SEGMENTS_IN_A_BLOCK) % 8);
   uint8_t *segmentBitmaskBufferPtr;
 
-  assert(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
+  CONNECT_STACK_ASSERT(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -268,7 +268,7 @@ static uint16_t getTotalSegmentsCount(void)
   uint16_t totalSegments =
     (uint16_t)(imageInfo.size / MAX_SEGMENT_PAYLOAD_LENGTH);
 
-  assert(imageInfo.size > 0);
+  CONNECT_STACK_ASSERT(imageInfo.size > 0);
 
   if ((imageInfo.size % MAX_SEGMENT_PAYLOAD_LENGTH) > 0) {
     totalSegments++;
@@ -416,7 +416,7 @@ static void sendMissingSegmentsResponse(EmberNodeId serverId,
     uint8_t i;
     uint8_t *segmensBitmaskBufferPtr;
 
-    assert(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
+    CONNECT_STACK_ASSERT(segmentBitmaskBuffer != EMBER_NULL_BUFFER);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
     emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -569,7 +569,7 @@ static void historyTableAddEntry(uint8_t otaProtocolStatus,
     }
   }
 
-  assert(entryIndex < HISTORY_TABLE_SIZE);
+  CONNECT_STACK_ASSERT(entryIndex < HISTORY_TABLE_SIZE);
 
   scriptCheckHistoryTableAdd(entryIndex);
 

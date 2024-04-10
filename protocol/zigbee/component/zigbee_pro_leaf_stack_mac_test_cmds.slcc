@@ -1,5 +1,5 @@
 id: zigbee_pro_leaf_stack_mac_test_cmds
-label: Pro Leaf Stack
+label: Pro Leaf Stack with Mac test commands
 package: Zigbee
 category: Zigbee|Stack|Pro Core
 quality: production

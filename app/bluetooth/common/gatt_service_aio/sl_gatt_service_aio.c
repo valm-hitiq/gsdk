@@ -3,7 +3,7 @@
  * @brief Automation IO GATT service
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -29,6 +29,7 @@
  ******************************************************************************/
 
 #include "stdbool.h"
+#include "sl_common.h"
 #include "sl_status.h"
 #include "gatt_db.h"
 #include "app_assert.h"

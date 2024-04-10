@@ -97,15 +97,15 @@ static sl_status_t send_event_from_storage(esl_lib_ap_control_evt_type_t evt_typ
 // Private variables
 
 static ap_control_t ap_control = {
-  .initialized      = false,
-  .cp_handle    = ESL_LIB_INVALID_CHARACTERISTIC_HANDLE,
-  .it_handle    = ESL_LIB_INVALID_CHARACTERISTIC_HANDLE,
-  .state        = ESL_LIB_AP_CONTROL_STATE_DISCONNECTED,
-  .conn_handle  = SL_BT_INVALID_CONNECTION_HANDLE,
+  .initialized   = false,
+  .cp_handle     = ESL_LIB_INVALID_CHARACTERISTIC_HANDLE,
+  .it_handle     = ESL_LIB_INVALID_CHARACTERISTIC_HANDLE,
+  .state         = ESL_LIB_AP_CONTROL_STATE_DISCONNECTED,
+  .conn_handle   = SL_BT_INVALID_CONNECTION_HANDLE,
   .subscribed_cp = false,
   .subscribed_it = false,
-  .adv_handle   = SL_BT_INVALID_ADVERTISING_SET_HANDLE,
-  .cp_storage   = ESL_LIB_INVALID_HANDLE
+  .adv_handle    = SL_BT_INVALID_ADVERTISING_SET_HANDLE,
+  .cp_storage    = ESL_LIB_INVALID_HANDLE
 };
 
 // -----------------------------------------------------------------------------
@@ -113,12 +113,24 @@ static ap_control_t ap_control = {
 
 sl_status_t esl_lib_ap_control_cleanup(void)
 {
-  if (ap_control.conn_handle != SL_BT_INVALID_CONNECTION_HANDLE) {
-    (void)sl_bt_connection_close(ap_control.conn_handle);
+  if (ap_control.initialized) {
+    if (ap_control.conn_handle != SL_BT_INVALID_CONNECTION_HANDLE) {
+      (void)sl_bt_connection_close(ap_control.conn_handle);
+    }
+    (void)esl_lib_ap_control_adv_enable(false);
+    (void)esl_lib_storage_delete(&ap_control.cp_storage);
+    esl_lib_log_ap_control_debug("AP Control cleanup complete" APP_LOG_NL);
+    // Reset static state storage
+    ap_control.initialized   = false;
+    ap_control.cp_handle     = ESL_LIB_INVALID_CHARACTERISTIC_HANDLE;
+    ap_control.it_handle     = ESL_LIB_INVALID_CHARACTERISTIC_HANDLE;
+    ap_control.state         = ESL_LIB_AP_CONTROL_STATE_DISCONNECTED;
+    ap_control.conn_handle   = SL_BT_INVALID_CONNECTION_HANDLE;
+    ap_control.subscribed_cp = false;
+    ap_control.subscribed_it = false;
+    ap_control.adv_handle    = SL_BT_INVALID_ADVERTISING_SET_HANDLE;
+    ap_control.cp_storage    = ESL_LIB_INVALID_HANDLE;
   }
-  (void)esl_lib_storage_delete(&ap_control.cp_storage);
-  (void)esl_lib_ap_control_adv_enable(false);
-  esl_lib_log_ap_control_debug("AP Control cleanup complete" APP_LOG_NL);
   return SL_STATUS_OK;
 }
 

@@ -323,6 +323,12 @@ sl_status_t app_settings_set_string(const char *value_str,
   entry_value_str = entry->value;
   strncpy(entry_value_str, value_str, entry->value_size - 1);
   entry_value_str[entry->value_size - 1] = '\0';
+  if (strlen(value_str) >= entry->value_size) {
+    printf("Warning: string is too long for %s.%s, truncated to \"%s\"\r\n",
+           app_settings_domain_str[entry->domain],
+           entry->key,
+           entry_value_str);
+  }
 
   return SL_STATUS_OK;
 }

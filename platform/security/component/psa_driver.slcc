@@ -24,6 +24,10 @@ requires:
   # (trustzone_unaware) should be used.
   - name: trustzone_security_state
 
+  # Can be used to check whether or not certain platform components are included
+  # in the end-project.
+  - name: component_catalog
+
 recommends:
   # Assume that projects are TZ unaware unless a state is explicitly included.
   - id: trustzone_unaware

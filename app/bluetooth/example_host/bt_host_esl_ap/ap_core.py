@@ -41,6 +41,8 @@ from esl_tag import Tag, TagState, EslState, InvalidTagStateError, ImageUpdateFa
 from esl_tag_db import TagDB
 from ap_ead import KeyMaterial, EAD
 from esl_command import ESLCommand
+from qrcode_generator import generate_qrcode
+from io import BytesIO
 import esl_key_lib
 import esl_lib
 import esl_lib_wrapper as elw
@@ -377,6 +379,7 @@ class AccessPoint():
             - label         Label to be printed as an overlay to the image
             - rotation      Clockwise (cw), Counter-clockwise (ccw), flip
         """
+        qr_request = False
          # If image file is from console, check validity
         if isinstance(file, str) and not self.controller_command:
             self.raw_image = b""
@@ -421,8 +424,20 @@ class AccessPoint():
             self.notify_controller(CCMD_REQUEST_DATA, CONTROLLER_COMMAND_SUCCESS, REQUEST_IMAGE_DATA_HEADER, self.image_data_offset, REQUEST_IMAGE_DATA_RESERVED)
             return
 
+        if file is None and len(tags_to_update) != 0:
+           self.log.info("QR code generation requested for %d number of tags to image slot %d", len(tags_to_update), image_index)
+           qr_request = True
+
         for tag in tags_to_update:
             try:
+                if qr_request:
+                    # Create Silabs' ESL Demo specific command encoded into a QR code
+                    _, file = generate_qrcode(f"connect {str(tag.ble_address).partition(',')[0]}", 128, 128)
+                    # Convert to byte stream as if sent from demo controller
+                    img_byte_arr = BytesIO()
+                    file.save(img_byte_arr, format='PNG')
+                    # Each tag will have its own, unique QR now as byte stream input
+                    file = img_byte_arr.getvalue()
                 tag.image_update(image_index, file, raw, display_ind, label, rotation, cropfit)
                 self.log.info("Image update started for tag at %s to image slot %d", tag.ble_address, image_index)
             except ImageUpdateFailed as ex:
@@ -1237,7 +1252,7 @@ class AccessPoint():
                     if not tag.blocked:
                         self.log.warning("ESL at address %s has been blocked due to unsuccessful connection attempt(s).", evt.node_id)
                         tag.block(elw.ESL_LIB_STATUS_BONDING_FAILED)
-                elif evt.sl_status == elw.SL_STATUS_BT_CTRL_CONNECTION_TERMINATED_BY_LOCAL_HOST and evt.data == elw.ESL_LIB_CONNECTION_STATE_ESL_DISCOVERY:
+                elif evt.sl_status == elw.SL_STATUS_BT_CTRL_CONNECTION_TERMINATED_BY_LOCAL_HOST and (evt.data == elw.ESL_LIB_CONNECTION_STATE_ESL_DISCOVERY or evt.data == elw.ESL_LIB_CONNECTION_STATE_SERVICE_DISCOVERY):
                     if tag.blocked:
                         self.key_db.delete_ltk(tag.ble_address) # remove key of ESLs which are violating the spec (that is, which are lack of any mandatory GATT entries)
                         self.log.debug("Bonding for ESL at address %s deleted due to ESL Profile/Service violation.", tag.ble_address)
@@ -1272,7 +1287,11 @@ class AccessPoint():
                 if tag is not None and tag.provisioned and not tag.advertising:
                     self.log.debug("Check if Tag at address %s got synchronized despite the connection closing timeout.", tag.ble_address)
                     self.ap_ping(tag.esl_id, tag.group_id) # Special edge case in which the synced flag may not be set after disconnection -> check if tag is synced
-
+        elif evt.lib_status == elw.ESL_LIB_STATUS_CONN_DISCOVERY_FAILED and evt.sl_status == elw.SL_STATUS_BT_ATT_REQUEST_NOT_SUPPORTED and evt.data == elw.ESL_LIB_CONNECTION_STATE_SERVICE_DISCOVERY:
+            tag = self.tag_db.find(evt.node_id)
+            if tag is not None and not tag.blocked:
+                self.log.warning("ESL at address %s has been blocked due to missing mandatory service!", evt.node_id)
+                tag.block(evt.lib_status)
     def esl_event_image_type(self, evt: esl_lib.EventImageType):
         """ ESL event handler """
         # Cache image type
@@ -1333,7 +1352,7 @@ class AccessPoint():
         if tag is not None and tag.state == TagState.IDLE:
             if tag.advertising:
                 if self.pawr_active and not tag.blocked:
-                    self.check_address_list()
+                    self.check_address_list(tag)
             elif not self.pawr_active:
                 self.log.error("ESL tag cannot be synchronized because PAwR is not started!")
                 self.log.info("Please re-start auto mode with command: 'mode auto' to recover.")
@@ -1369,11 +1388,14 @@ class AccessPoint():
             self.log.warning("AUTO MODE TEMPORARILY CHANGED TO MANUAL!")
             self.cmd_mode = self.auto_override
             self.set_mode_handlers()
-        elif tag is not None and tag.provisioned: # we remain in auto mode, so aviod stuck connected in special case below
-            if tag.max_image_index is not None and tag.has_image_transfer and IMAGE_MAX_AUTO_UPLOAD_COUNT and tag.auto_image_count < min((tag.max_image_index + 1), IMAGE_MAX_AUTO_UPLOAD_COUNT):
-                self.upload_auto_image((tag.auto_image_count % len(self.image_files)), tag)
-            else:
-                self.ap_update_complete(tag.esl_id, tag.group_id)
+        elif tag is not None:
+            if evt.status != elw.SL_STATUS_OK:
+                self.disconnect(tag) # auto mode can't do anything with a Tag that is connected with failure
+            elif tag.provisioned: # we remain in auto mode, so aviod stuck connected in special case below
+                if tag.max_image_index is not None and tag.has_image_transfer and IMAGE_MAX_AUTO_UPLOAD_COUNT and tag.auto_image_count < min((tag.max_image_index + 1), IMAGE_MAX_AUTO_UPLOAD_COUNT):
+                    self.upload_auto_image((tag.auto_image_count % len(self.image_files)), tag)
+                else:
+                    self.ap_update_complete(tag.esl_id, tag.group_id)
 
     def auto_esl_event_tag_info(self, evt: esl_lib.EventTagInfo):
         """ ESL event handler in auto mode """
@@ -1510,7 +1532,13 @@ class AccessPoint():
     def demo_esl_event_connection_opened(self, evt: esl_lib.EventConnectionOpened):
         """ ESL event handler in demo mode """
         if self.controller_command != None and not self.demo_auto_reconfigure:
-            self.notify_controller(self.controller_command,CONTROLLER_COMMAND_SUCCESS)
+            if (evt.status == elw.SL_STATUS_OK):
+                self.notify_controller(self.controller_command,CONTROLLER_COMMAND_SUCCESS)
+            else:
+                self.notify_controller(self.controller_command,CONTROLLER_COMMAND_FAIL)
+                tag = self.tag_db.find(evt.address)
+                if tag is not None:
+                    self.disconnect(tag)
 
     def demo_esl_event_tag_found(self, evt: esl_lib.EventTagFound):
         """ ESL event handler in demo mode """
@@ -1528,7 +1556,8 @@ class AccessPoint():
 
     def demo_esl_event_connection_closed(self, evt: esl_lib.EventConnectionClosed):
         """ ESL event handler in demo mode """
-        self.demo_auto_reconfigure = False
+        if self.demo_auto_reconfigure and len(self.tag_db.list_state((TagState.CONNECTED, TagState.CONNECTING))) == 0:
+            self.demo_auto_reconfigure = False
         if self.controller_command == CCMD_DISCONNECT:
             self.notify_controller(self.controller_command, CONTROLLER_COMMAND_SUCCESS)
         elif self.controller_command != None:
@@ -1557,15 +1586,19 @@ class AccessPoint():
             self.log.warning("REVERT TO AUTO MODE!")
             self.set_mode_handlers()
 
-    def check_address_list(self):
-        """ Check address list """
+    def check_address_list(self, target = None): # no specific tag by default
+        """ Check address list, or try connect to particular tag """
         if self.pawr_active and self.bonding_finished and len(self.tag_db.list_state(TagState.CONNECTING)) < ESL_CMD_MAX_PENDING_CONNECTION_REQUEST_COUNT:
-            self.log.info("Checking for next advertising ESL")
-            # Advertising IDLE state tags those are not blocked
-            tag_list = [tag for tag in self.tag_db.list_state(TagState.IDLE) if not tag.blocked and tag.advertising]
+            if target is None:
+                self.log.info("Checking for next advertising ESL")
+                # Advertising IDLE state tags those are not blocked
+                tag_list = [tag for tag in self.tag_db.list_state(TagState.IDLE) if not tag.blocked and tag.advertising]
+            else:
+                self.log.info("Initiate connection to ESL at %s address.", target.ble_address)
+                tag_list = [target]
             if len(tag_list) > 0:
-                tag = tag_list[0]
                 if not self.max_conn_count_reached:
+                    tag = tag_list[random.randint(0, len(tag_list) - 1)] # chosing randomly helps to cope with netwokrs that include erroneous tags
                     self.bonding_finished = False
                     self.connect(tag)
                     if self.auto_config_start_time is None:
@@ -2049,6 +2082,10 @@ class AccessPoint():
                 tag = active_tag
 
         if tag is None:
+            # Check if the current PAwR has the proper amount of subevents for the group request
+            if (group_id >= self.subevent_count):
+                self.log.error("Sending to group %d is impossible because there are only %d subevents in current PAwR train!", group_id, self.subevent_count)
+                return
             self.queue_pawr_command(group_id, data)
         else:
             self.send_cp_command(tag, data)

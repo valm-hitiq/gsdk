@@ -62,17 +62,17 @@ extern "C" {
 
 // Periodic advertisement interval for PAwR train.
 // Value in units of 1.25 ms.
-#define ESL_LIB_PAWR_MIN_INTERVAL_DEFAULT          1233
+#define ESL_LIB_PAWR_MIN_INTERVAL_DEFAULT          1248
 // Number of subevents, practically has to be equal to the supported number
 // of ESL groups.
 #define ESL_LIB_PAWR_MAX_INTERVAL_DEFAULT          ESL_LIB_PAWR_MIN_INTERVAL_DEFAULT
-// Scalable up to 7140 tags in 28 groups
-#define ESL_LIB_PAWR_SUBEVENT_COUNT_DEFAULT        28
+// Scalable up to 6630 tags in 26 groups
+#define ESL_LIB_PAWR_SUBEVENT_COUNT_DEFAULT        26
 // 55 ms
-#define ESL_LIB_PAWR_SUBEVENT_INTERVAL_DEFAULT     44
+#define ESL_LIB_PAWR_SUBEVENT_INTERVAL_DEFAULT     48
 // Time between the advertising packet in a subevent and the first response
 // slot. Value in units of 1.25 ms.
-#define ESL_LIB_PAWR_RESPONSE_SLOT_DELAY_DEFAULT   30
+#define ESL_LIB_PAWR_RESPONSE_SLOT_DELAY_DEFAULT   34
 // Time between response slots. Value in units of 0.125 ms.
 // 0.75 ms enough for up to 75 bytes on 1M phy
 // (including LL overhead plus T_IFS)
@@ -456,6 +456,7 @@ typedef struct esl_lib_evt_connection_opened_s {
   esl_lib_connection_handle_t connection_handle; ///< Connection handle
   esl_lib_address_t           address;           ///< BLE address
   esl_lib_gattdb_handles_t    gattdb_handles;    ///< GATT database handles
+  sl_status_t                 status;            ///< Status
 } esl_lib_evt_connection_opened_t;
 
 /// Bonding data event

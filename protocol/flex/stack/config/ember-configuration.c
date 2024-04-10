@@ -98,5 +98,6 @@ uint32_t *emIndirectQueueTimeouts = indirectQueueTimeouts;
 uint32_t emberMacIndirectTimeoutMs = EMBER_INDIRECT_TRANSMISSION_TIMEOUT_MS;
 
 uint16_t emberCoordinatorFirstShortIdToBeAssigned = EMBER_COORDINATOR_FIRST_SHORT_ID_TO_BE_ASSIGNED;
+uint32_t emberNwkRangeExtenderUpdatePeriodSec = EMBER_NWK_RANGE_EXTENDER_UPDATE_PERIOD_SEC;
 
 #endif // SL_CATALOG_CONNECT_PARENT_SUPPORT_PRESENT

@@ -36,7 +36,13 @@
 // app/util/ezsp/ezsp-enum.h.
 #define MFGSAMP_EZSP_TOKEN_MFG_MAXSIZE 92
 
+#if defined(SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_UNICAST_PRESENT)    \
+  || defined(SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_BROADCAST_PRESENT) \
+  || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
 extern EmberStatus emberAfTrustCenterStartNetworkKeyUpdate(void);
+#endif // defined(SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_UNICAST_PRESENT) ||
+// defined(SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_BROADCAST_PRESENT) ||
+// defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
 
 //----------------------
 // ZCL commands handling
@@ -216,6 +222,9 @@ void mfgappTokenDump(sl_cli_command_arg_t *arguments)
   sl_zigbee_app_debug_println("");
 }
 
+#if defined(SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_UNICAST_PRESENT)    \
+  || defined(SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_BROADCAST_PRESENT) \
+  || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
 void changeNwkKeyCommand(sl_cli_command_arg_t *arguments)
 {
   (void)arguments;
@@ -228,6 +237,9 @@ void changeNwkKeyCommand(sl_cli_command_arg_t *arguments)
     sl_zigbee_app_debug_println("Change Key Success");
   }
 }
+#endif // defined(SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_UNICAST_PRESENT) ||
+// defined(SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_BROADCAST_PRESENT) ||
+// defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
 
 static void dcPrintKey(uint8_t label, uint8_t *key)
 {

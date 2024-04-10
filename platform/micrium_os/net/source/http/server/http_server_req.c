@@ -1816,6 +1816,9 @@ static CPU_CHAR *HTTPsReq_HdrParseValGet(CPU_CHAR   *p_field,
   len = (p_field_end - p_val);
 
   p_val = Str_Char_N(p_val, len, ASCII_CHAR_COLON);             // Field val located after ':' (see Note #1a).
+  if (p_val == DEF_NULL) {
+    return (DEF_NULL);
+  }
   p_val++;
 
   len = (p_field_end - p_val);

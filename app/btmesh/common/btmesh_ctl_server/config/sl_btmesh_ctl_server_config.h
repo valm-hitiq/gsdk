@@ -45,9 +45,9 @@
 #define SL_BTMESH_CTL_SERVER_PS_KEY_CFG_VAL   (0x4005)
 
 // <o SL_BTMESH_CTL_SERVER_PWM_UPDATE_PERIOD_CFG_VAL> Periodicity [ms] for updating the PWM duty cycle during a transition.
-// <i> Default: 1
+// <i> Default: 10
 // <i> Periodicity [ms] for updating the PWM duty cycle during a transition.
-#define SL_BTMESH_CTL_SERVER_PWM_UPDATE_PERIOD_CFG_VAL   (1)
+#define SL_BTMESH_CTL_SERVER_PWM_UPDATE_PERIOD_CFG_VAL   (10)
 
 // <o SL_BTMESH_CTL_SERVER_UI_UPDATE_PERIOD_CFG_VAL> Periodicity [ms] for updating the UI with temperature & delta UV during a transition.
 // <i> Default: 100

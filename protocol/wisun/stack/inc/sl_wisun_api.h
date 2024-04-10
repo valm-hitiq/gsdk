@@ -415,6 +415,20 @@ sl_status_t sl_wisun_set_device_private_key_id(uint32_t key_id);
 sl_status_t sl_wisun_set_regulation(sl_wisun_regulation_t regulation);
 
 /**************************************************************************//**
+ * Set neighbor table size.
+ *
+ * @param[in] size Size of the neighbor table
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *
+ * This function sets the limit of regular neighbors supported by the
+ * node [1, 245], without considering temporary or RPL parents.
+ * Increasing this parameter means a higher number of potential neighbors
+ * while lowering it means reduced RAM consumption.
+ * The default value is 22.
+ *****************************************************************************/
+sl_status_t sl_wisun_set_neighbor_table_size(uint8_t size);
+
+/**************************************************************************//**
  * Set the thresholds for transmission duration level event.
  *
  * @param[in] warning_threshold Warning threshold in percent or -1 to disable

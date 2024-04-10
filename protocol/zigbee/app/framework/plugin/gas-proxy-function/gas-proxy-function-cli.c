@@ -1705,7 +1705,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x00,  // extended header control field
                              0x07, 0x09,  // extended header cluster id
                              0x00, 0x11,  // extended gbz command length
-                             0x01,  // frame control
+                             0x11,  // frame control
                              0x00,  // trans. seq number
                              0x00,  // ZCL command id - GetEventLog
                              0x13,  // Event Control / Log ID - GPF General Log
@@ -1719,7 +1719,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x01,  // extended header control field
                              0x07, 0x09,  // extended header cluster id
                              0x00, 0x11,  // extended gbz command length
-                             0x01,  // frame control
+                             0x11,  // frame control
                              0x01,  // trans. seq number
                              0x00,  // ZCL command id - GetEventLog
                              0x16,  // Event Control / Log ID - GSME General Log
@@ -1750,7 +1750,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x00,  // extended header control field
                              0x07, 0x09,  // extended header cluster id
                              0x00, 0x11,  // extended gbz command length
-                             0x01,  // frame control
+                             0x11,  // frame control
                              0x00,  // trans. seq number
                              0x00,  // ZCL command id - GetEventLog
                              0x04,  // Event Control / Log ID - GPF Security Log
@@ -1764,7 +1764,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x01,  // extended header control field
                              0x07, 0x09,  // extended header cluster id
                              0x00, 0x11,  // extended gbz command length
-                             0x01,  // frame control
+                             0x11,  // frame control
                              0x01,  // trans. seq number
                              0x00,  // ZCL command id - GetEventLog
                              0x07,  // Event Control / Log ID - GSME Security Log
@@ -1957,7 +1957,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
       gbzCommand[gbzCommandIndex++] = 0x00;                          // extended gbz command length
       gbzCommand[gbzCommandIndex++] = 0x10;
 
-      emberAfCopyInt8u(gbzCommand, gbzCommandIndex, 0x01);        // frame control
+      emberAfCopyInt8u(gbzCommand, gbzCommandIndex, 0x11);        // frame control
       gbzCommandIndex += 1;
       emberAfCopyInt8u(gbzCommand, gbzCommandIndex, i);           // trans. seq number
       gbzCommandIndex += 1;
@@ -1985,7 +1985,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
       gbzCommand[gbzCommandIndex++] = 0x00;                          // extended gbz command length
       gbzCommand[gbzCommandIndex++] = 0x10;
 
-      emberAfCopyInt8u(gbzCommand, gbzCommandIndex, 0x01);        // frame control
+      emberAfCopyInt8u(gbzCommand, gbzCommandIndex, 0x11);        // frame control
       gbzCommandIndex += 1;
       emberAfCopyInt8u(gbzCommand, gbzCommandIndex, i + 12);        // trans. seq number
       gbzCommandIndex += 1;
@@ -2032,7 +2032,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
       gbzCommand[gbzCommandIndex++] = 0x00;                          // extended gbz command length
       gbzCommand[gbzCommandIndex++] = 0x10;
 
-      emberAfCopyInt8u(gbzCommand, gbzCommandIndex, 0x01);        // frame control
+      emberAfCopyInt8u(gbzCommand, gbzCommandIndex, 0x11);        // frame control
       gbzCommandIndex += 1;
       emberAfCopyInt8u(gbzCommand, gbzCommandIndex, i);           // trans. seq number
       gbzCommandIndex += 1;
@@ -2060,7 +2060,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
       gbzCommand[gbzCommandIndex++] = 0x00;                          // extended gbz command length
       gbzCommand[gbzCommandIndex++] = 0x10;
 
-      emberAfCopyInt8u(gbzCommand, gbzCommandIndex, 0x01);        // frame control
+      emberAfCopyInt8u(gbzCommand, gbzCommandIndex, 0x11);        // frame control
       gbzCommandIndex += 1;
       emberAfCopyInt8u(gbzCommand, gbzCommandIndex, i + 12);        // trans. seq number
       gbzCommandIndex += 1;
@@ -2118,7 +2118,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x07, 0x05,  // extended header cluster id
                              0x00, 0x08,  // extended gbz command length
                              0x00, 0x00, 0x00, 0x00,  // extended header from date (TODO)
-                             0x01,  // frame control
+                             0x11,  // frame control
                              0x00,  // trans. seq number
                              0x08,  // ZCL command id - GetTopUpLog
                              0xFE, 0xFF, 0xFF, 0xFF,  // Latest End Time
@@ -2141,7 +2141,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x00, // extended header control field
                              0x07, 0x00, // extended header cluster id
                              0x00, 0x27, // extended gbz command length
-                             0x00, // frame control
+                             0x10, // frame control
                              0x00, // trans. seq number
                              0x00, // ZCL command id - ReadAttributes
                              0x03, 0x02, // Attribute ID - Block Period: ThresholdDivisor
@@ -2167,7 +2167,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x00, // extended header control field
                              0x07, 0x07, // extended header cluster id
                              0x00, 0x0D, // extended gbz command length
-                             0x01, // frame control
+                             0x11, // frame control
                              0x01, // trans. seq number
                              0x01, // ZCL command id - GetDayProfiles
                              0x00, 0x00, 0x00, 0x00, // Provider ID - unused
@@ -2179,7 +2179,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x00, // extended header control field
                              0x07, 0x07, // extended header cluster id
                              0x00, 0x0D, // extended gbz command length
-                             0x01, // frame control
+                             0x11, // frame control
                              0x02, // trans. seq number
                              0x02, // ZCL command id - GetWeekProfiles
                              0x00, 0x00, 0x00, 0x00, // Provider ID - unused
@@ -2191,7 +2191,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x00, // extended header control field
                              0x07, 0x07, // extended header cluster id
                              0x00, 0x0B, // extended gbz command length
-                             0x01, // frame control
+                             0x11, // frame control
                              0x03, // trans. seq number
                              0x03, // ZCL command id - GetSeasons
                              0x00, 0x00, 0x00, 0x00, // Provider ID - unused
@@ -2201,7 +2201,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x00, // extended header control field
                              0x07, 0x07, // extended header cluster id
                              0x00, 0x11, // extended gbz command length
-                             0x01, // frame control
+                             0x11, // frame control
                              0x04, // trans. seq number
                              0x04, // ZCL command id - GetSpecialDays
                              0x00, 0x00, 0x00, 0x00, // Start Time
@@ -2214,7 +2214,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x01, // extended header control field
                              0x07, 0x00, // extended header cluster id
                              0x00, 0x04, // extended gbz command length
-                             0x01, // frame control
+                             0x11, // frame control
                              0x05, // trans. seq number
                              0x00, // ZCL command id - GetCurrentPrice
                              0x00, // Active Price
@@ -2236,7 +2236,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x00, // extended header control field
                              0x07, 0x05, // extended header cluster id
                              0x00, 0x1B, // extended gbz command length
-                             0x00, // frame control
+                             0x10, // frame control
                              0x00, // trans. seq number
                              0x00, // ZCL command id - ReadAttributes
                              0x39, 0x02, // Attribute ID - Debt Attribute: DebtRecoveryTopUpPercentage#3
@@ -2256,7 +2256,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x00, // extended header control field
                              0x07, 0x00, // extended header cluster id
                              0x00, 0x05, // extended gbz command length
-                             0x00, // frame control
+                             0x10, // frame control
                              0x01, // trans. seq number
                              0x00, // ZCL command id - ReadAttributes
                              0x17, 0x06, //Attribute ID - Price Trailing Digits
@@ -2265,7 +2265,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x00, // extended header control field
                              0x07, 0x07, // extended header cluster id
                              0x00, 0x0D, // extended gbz command length
-                             0x01, // frame control
+                             0x11, // frame control
                              0x02, // trans. seq number
                              0x01, // ZCL command id - GetDayProfiles
                              0x00, 0x00, 0x00, 0x00, // Provider ID - unused
@@ -2277,7 +2277,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x00, // extended header control field
                              0x07, 0x07, // extended header cluster id
                              0x00, 0x0D, // extended gbz command length
-                             0x01, // frame control
+                             0x11, // frame control
                              0x03, // trans. seq number
                              0x02, // ZCL command id - GetWeekProfiles
                              0x00, 0x00, 0x00, 0x00, // Provider ID - unused
@@ -2289,7 +2289,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x00, // extended header control field
                              0x07, 0x07, // extended header cluster id
                              0x00, 0x0B, // extended gbz command length
-                             0x01, // frame control
+                             0x11, // frame control
                              0x04, // trans. seq number
                              0x03, // ZCL command id - GetSeasons
                              0x00, 0x00, 0x00, 0x00, // Provider ID - unused
@@ -2299,7 +2299,7 @@ void sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg(sl_cli_command_arg_t 
                              0x01, // extended header control field
                              0x07, 0x07, // extended header cluster id
                              0x00, 0x11, // extended gbz command length
-                             0x01, // frame control
+                             0x11, // frame control
                              0x05, // trans. seq number
                              0x04, // ZCL command id - GetSpecialDays
                              0x00, 0x00, 0x00, 0x00, // Start Time

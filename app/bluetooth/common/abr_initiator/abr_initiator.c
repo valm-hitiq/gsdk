@@ -426,6 +426,9 @@ void abr_initiator_deinit(void)
   sl_status_t sc;
 
   if (connection_handle != SL_BT_INVALID_CONNECTION_HANDLE) {
+    app_log_info("Shutting down CS parser" APP_LOG_NL);
+    sc = abr_cs_parser_deinit();
+    app_assert_status(sc);
     app_log_info("Closing connection" APP_LOG_NL);
     sc = sl_bt_connection_close(connection_handle);
     app_assert_status(sc);

@@ -91,10 +91,6 @@
 // <i> Default value 256 bytes
 #define SL_TFTP_CLNT_STACK_SIZE_WORD                 256UL
 
-// <o SL_TFTP_ADDR_SIZE> TFTP address storage size in bytes
-// <i> Default value 20 bytes
-#define SL_TFTP_ADDR_SIZE                            28UL
-
 // <s SL_TFTP_CLNT_DEFAULT_HOST> TFTP Default remote host address string
 // <i> Default: "aabb:ccdd::eeff:0011:2233:4455" (dummy)
 #define SL_TFTP_CLNT_DEFAULT_HOST                   "aabb:ccdd::eeff:0011:2233:4455"

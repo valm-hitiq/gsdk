@@ -6,7 +6,7 @@
 - category: Platform|Board|Kit|Wireless Starter Kit
 - quality: production
 - requires:
-  - name: brd4001a
+  - name: brd4002a
   - name: hardware_board_from_slwstk6065b
 - provides:
   - name: hardware_kit
@@ -15,9 +15,9 @@
   - name: SL_KIT_NAME
     value: '"SLWSTK6065B"'
   - name: SL_KIT_REV
-    value: '"A03"'
+    value: '"B01"'
 - tag:
   - kit:opn:SLWSTK6065B
   - kit:pn:WSTK6065
   - kit:variant:B
-  - kit:revision:A03
+  - kit:revision:B01

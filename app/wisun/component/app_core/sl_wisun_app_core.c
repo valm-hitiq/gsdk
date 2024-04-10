@@ -353,6 +353,7 @@ void sl_wisun_disconnected_event_hnd(sl_wisun_evt_t *evt)
 
   __CHECK_FOR_STATUS(evt->evt.error.status);
   _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_NETWORK_DISCONNECTED);
+  _join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
 }
 
 /* Socket connection lost event handler*/

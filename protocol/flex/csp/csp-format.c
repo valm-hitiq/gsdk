@@ -14,7 +14,7 @@
  *
  ******************************************************************************/
 
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include <string.h>
 #include "stack/include/ember.h"
 #include "stack/core/sli-connect-api.h"
@@ -188,7 +188,7 @@ uint8_t computeCommandLength(uint8_t initialLength, const char* format, va_list 
         break;
       }
       default:
-        assert(false);
+        CONNECT_STACK_ASSERT(false);
         break;
     }
   }
@@ -293,14 +293,14 @@ uint16_t formatResponseCommandFromArgList(uint8_t *buffer,
       }
       default:
         // confused!
-        assert(false);
+        CONNECT_STACK_ASSERT(false);
         break;
     }
   }
 
   uint16_t length = finger - buffer;
   // sanity check
-  assert(length <= bufferSize);
+  CONNECT_STACK_ASSERT(length <= bufferSize);
 
   return length;
 }

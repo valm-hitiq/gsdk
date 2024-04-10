@@ -180,9 +180,20 @@ uint8_t esl_core_get_basic_state_bit(uint8_t bit);
 esl_basic_state_t esl_core_set_basic_state_bit(uint8_t bit, uint8_t value);
 
 /**************************************************************************//**
+ * Get randomizer value for ESL response packet encryption.
+ * Returns SL_STATUS_NOT_READY until the randomizer is initialized.
+ * Returns SL_STATUS_OK on success after which the data will be available in
+ * the randomizer array passed as input parameter.
+ *
+ * @param[out] randomizer sl_bt_ead_randomizer_t array type to the storage
+ * @return sl_status_t
+ *****************************************************************************/
+sl_status_t esl_core_get_randomizer(sl_bt_ead_randomizer_t randomizer);
+
+/**************************************************************************//**
  * Read the value from the AP Key characteristics of ESL service.
  * Returns SL_STATUS_NOT_READY until AP Key is written by the bonded AP.
- * My return other failing status as well, depending on stack response, or
+ * May return other failing status as well, depending on stack response, or
  * SL_STATUS_OK on success. In the latter case, the data will be available in
  * *(uint8_t*)ap_key in a format of little endian (packed) byte stream. Size of
  * the stream is defined in ESL standard.

@@ -1,0 +1,22 @@
+!!omap
+- id: fg25_pk6014a
+- label: FG25-PK6014A
+- package: platform
+- description: Kit BSP support for the FG25-EFF01 RoW Pro Kit.
+- category: Platform|Board|Kit|Pro Kit
+- quality: production
+- requires:
+  - name: hardware_board_from_fg25-pk6014a
+- provides:
+  - name: hardware_kit
+  - name: hardware_kit_pk
+- define:
+  - name: SL_KIT_NAME
+    value: '"FG25-PK6014A"'
+  - name: SL_KIT_REV
+    value: '"A00"'
+- tag:
+  - kit:opn:FG25-PK6014A
+  - kit:pn:PK6014
+  - kit:variant:A
+  - kit:revision:A00

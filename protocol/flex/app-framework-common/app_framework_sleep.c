@@ -29,7 +29,7 @@
 // Define module name for Power Manager debuging feature.
 #define CURRENT_MODULE_NAME    "FLEX"
 
-#include <assert.h>
+#include "sl-connect-assert.h"
 #include "callback_dispatcher.h"
 #include "app_framework_callback.h"
 #include "stack/core/sli-connect-interrupt-manipulation.h"
@@ -150,7 +150,7 @@ bool connect_is_ok_to_sleep(void)
   // If durations_ms is 0 it means we could not enter em2, so we see how long we
   // can enter em1 instead.
   if (duration_ms == 0) {
-    assert(em1_requirement_set);
+    CONNECT_STACK_ASSERT(em1_requirement_set);
 
     duration_ms = emberStackIdleTimeMs(NULL);
     duration_ms = emberMsToNextEvent(emAppEvents, duration_ms);
@@ -168,12 +168,12 @@ bool connect_is_ok_to_sleep(void)
     if (app_allowed && duration_ms > 0 && duration_ms < MAX_INT32U_VALUE) {
       // We can enter em1 or em2 for a limited amount of time: either way we set
       // a timer to wake us up.
-      assert(sl_sleeptimer_restart_timer_ms(&wakeup_timer_id,
-                                            duration_ms,
-                                            wakeup_timer_callback,
-                                            NULL,
-                                            0u,
-                                            0u) == SL_STATUS_OK);
+      CONNECT_STACK_ASSERT(sl_sleeptimer_restart_timer_ms(&wakeup_timer_id,
+                                                          duration_ms,
+                                                          wakeup_timer_callback,
+                                                          NULL,
+                                                          0u,
+                                                          0u) == SL_STATUS_OK);
     }
 
     return app_allowed;

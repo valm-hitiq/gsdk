@@ -108,7 +108,7 @@ DEFINE_INDEXED_TOKEN(STACK_GP_PROXY_TABLE,
 DEFINE_INDEXED_TOKEN(STACK_GP_INCOMING_FC,
                      tokTypeGPDIncomingFC,
                      EMBER_GP_INCOMING_FC_TOKEN_TABLE_SIZE,
-                     { 0xFFFFFFFFU })
+                     { 0x00000000U })
 
 // Sink Table and Sink table incoming FC tokens
 
@@ -140,5 +140,5 @@ DEFINE_INDEXED_TOKEN(STACK_GP_SINK_TABLE,
 DEFINE_INDEXED_TOKEN(STACK_GP_INCOMING_FC_IN_SINK,
                      tokTypeGPDIncomingFCInSink,
                      EMBER_GP_SINK_TABLE_SIZE,
-                     { 0xFFFFFFFFU })
+                     { 0x00000000U })
 #endif

@@ -3,7 +3,7 @@
  * @brief Core application logic.
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 
+#include "sl_common.h"
 #include "sl_bluetooth.h"
 #include "app_assert.h"
 #include "app.h"

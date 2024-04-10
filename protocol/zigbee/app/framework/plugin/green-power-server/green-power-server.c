@@ -2659,7 +2659,7 @@ bool emberAfGreenPowerClusterGpNotificationCallback(EmberAfClusterCommand *cmd)
       if (sinkSecLevel > 0) {
         if (sinkSecLevel > receivedSecLevel
             || sinkKeyType != receivedKeyType
-            || entry.gpdSecurityFrameCounter > cmd_data.gpdSecurityFrameCounter) {
+            || entry.gpdSecurityFrameCounter >= cmd_data.gpdSecurityFrameCounter) {
           // DROP
           emberAfGreenPowerClusterPrintln("Gp Notif : DROP - SecLevel, Key type or framecounter mismatch");
           return true;

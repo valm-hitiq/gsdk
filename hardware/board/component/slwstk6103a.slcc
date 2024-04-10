@@ -6,7 +6,7 @@
 - category: Platform|Board|Kit|Wireless Starter Kit
 - quality: production
 - requires:
-  - name: brd4001a
+  - name: brd4002a
   - name: hardware_board_from_slwstk6103a
 - provides:
   - name: hardware_kit
@@ -15,9 +15,9 @@
   - name: SL_KIT_NAME
     value: '"SLWSTK6103A"'
   - name: SL_KIT_REV
-    value: '"A07"'
+    value: '"B01"'
 - tag:
   - kit:opn:SLWSTK6103A
   - kit:pn:WSTK6103
   - kit:variant:A
-  - kit:revision:A07
+  - kit:revision:B01

@@ -75,25 +75,23 @@ bool sli_zigbee_af_process_cluster_specific_command(EmberAfClusterCommand *cmd)
                        cmd->apsFrame->destinationEndpoint,
                        cmd->apsFrame->clusterId,
                        cmd->commandId);
-    emberAfSendDefaultResponse(cmd, EMBER_ZCL_STATUS_FAILURE);
-    return true;
-  }
-
-  if ((cmd->direction == (uint8_t)ZCL_DIRECTION_SERVER_TO_CLIENT
-       && emberAfContainsClientWithMfgCode(cmd->apsFrame->destinationEndpoint,
-                                           cmd->apsFrame->clusterId,
-                                           cmd->mfgCode))
-      || (cmd->direction == (uint8_t)ZCL_DIRECTION_CLIENT_TO_SERVER
-          && emberAfContainsServerWithMfgCode(cmd->apsFrame->destinationEndpoint,
-                                              cmd->apsFrame->clusterId,
-                                              cmd->mfgCode))) {
+    zcl_status = EMBER_ZCL_STATUS_FAILURE;
+  } else if ((cmd->direction == (uint8_t)ZCL_DIRECTION_SERVER_TO_CLIENT
+              && emberAfContainsClientWithMfgCode(cmd->apsFrame->destinationEndpoint,
+                                                  cmd->apsFrame->clusterId,
+                                                  cmd->mfgCode))
+             || (cmd->direction == (uint8_t)ZCL_DIRECTION_CLIENT_TO_SERVER
+                 && emberAfContainsServerWithMfgCode(cmd->apsFrame->destinationEndpoint,
+                                                     cmd->apsFrame->clusterId,
+                                                     cmd->mfgCode))) {
     zcl_status = emberAfClusterSpecificCommandParse(cmd);
+  } else {
+    // Do nothing.
   }
-
-  if (zcl_status != EMBER_ZCL_STATUS_SUCCESS) {
-    emberAfSendDefaultResponse(cmd, zcl_status);
-  }
-
+  // Call emberAfSendDefaultResponse, in which, it would check for other
+  // conditions including Disable Default Response bit of ZCL FC of the
+  // incoming command.
+  emberAfSendDefaultResponse(cmd, zcl_status);
   return true;
 }
 

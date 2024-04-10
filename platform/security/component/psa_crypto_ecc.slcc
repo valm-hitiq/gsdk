@@ -27,8 +27,7 @@ requires:
     condition: [device_series_0]
   - name: mbedtls_ecc
     condition: [device_series_1]
-  - name: sl_si91x_psa_ecdh
-    from: wiseconnect3_sdk
+  - name: mbedtls_ecc
     condition: [device_si91x]
 
 recommends:
