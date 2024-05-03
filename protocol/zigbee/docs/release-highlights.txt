@@ -1,5 +1,5 @@
-Zigbee EmberZNet SDK 7.4.2.0
+Zigbee EmberZNet SDK 7.4.3.0
 Zigbee:
-- Targeted quality improvements and bug fixes.
+- Underlying platform changes only.
 Multiprotocol
-- Targeted quality improvements and bug fixes.
+- Underlying platform changes only.

@@ -1,2 +1,2 @@
-Flex SDK 3.7.2.0
-- Targeted quality improvements and bug fixes.
+Flex SDK 3.7.3.0
+- Underlying platform changes only.
