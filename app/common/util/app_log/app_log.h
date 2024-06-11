@@ -623,7 +623,7 @@ uint8_t app_log_filter_mask_get(void);
 // ARRAY DUMP
 #define app_log_array_dump_level(level, p_data, len, format) \
   app_log_array_dump_level_s(level,                          \
-                             APP_LOG_ARRAY_DUMP_SEPARATOR    \
+                             APP_LOG_ARRAY_DUMP_SEPARATOR,   \
                              p_data,                         \
                              len,                            \
                              format)
