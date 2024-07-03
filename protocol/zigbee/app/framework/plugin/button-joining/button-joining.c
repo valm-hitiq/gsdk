@@ -83,10 +83,10 @@ void emAfPluginButtonJoiningInitCallback(SLXU_INIT_ARG)
 {
   SLXU_INIT_UNUSED_ARG;
 
-  slxu_zigbee_event_init(&emberAfPluginButtonJoiningButton0Event,
-                         emberAfPluginButtonJoiningButton0EventHandler);
-  slxu_zigbee_event_init(&emberAfPluginButtonJoiningButton1Event,
-                         emberAfPluginButtonJoiningButton1EventHandler);
+  sl_zigbee_af_isr_event_init(&emberAfPluginButtonJoiningButton0Event,
+                              emberAfPluginButtonJoiningButton0EventHandler);
+  sl_zigbee_af_isr_event_init(&emberAfPluginButtonJoiningButton1Event,
+                              emberAfPluginButtonJoiningButton1EventHandler);
 }
 
 void emberAfPluginButtonJoiningButton0EventHandler(SLXU_UC_EVENT)

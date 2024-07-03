@@ -1889,7 +1889,7 @@ bool emberAfGreenPowerClusterGpTranslationTableUpdateCallback(EmberAfClusterComm
           emberAfGreenPowerClusterPrintln("Entry @Index [%d] is not empty", index);
         } else if ( retval == GP_TRANSLATION_TABLE_STATUS_PARAM_DOES_NOT_MATCH) {
           emberAfGreenPowerClusterPrintln("Parameter does not match @Index [%d]", index);
-          emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE); //send failure notification immediately
+          emAfGreenPowerSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE); //send failure notification immediately
         }
       }
     } else if (action == 0x01) {
@@ -1911,7 +1911,7 @@ bool emberAfGreenPowerClusterGpTranslationTableUpdateCallback(EmberAfClusterComm
           emberAfGreenPowerClusterPrintln("Entry @Index [%d] is empty", index);
         } else if (retval == GP_TRANSLATION_TABLE_STATUS_PARAM_DOES_NOT_MATCH) {
           emberAfGreenPowerClusterPrintln("Parameter does not match @Index [%d]", index);
-          emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
+          emAfGreenPowerSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
         }
       }
     } else if (action == 0x02) {
@@ -1933,7 +1933,7 @@ bool emberAfGreenPowerClusterGpTranslationTableUpdateCallback(EmberAfClusterComm
           emberAfGreenPowerClusterPrintln("Entry @Index [%d] is empty", index);
         } else if (retval == GP_TRANSLATION_TABLE_STATUS_PARAM_DOES_NOT_MATCH) {
           emberAfGreenPowerClusterPrintln("Parameter does not match @Index [%d]", index);
-          emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
+          emAfGreenPowerSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
         }
       }
     } else {
@@ -1988,7 +1988,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
                                                                        0x00, //entryCount
                                                                        NULL,
                                                                        0);
-    emberAfSendResponse();
+    emAfGreenPowerSendResponse();
     goto kickout;
   } else {
     for (entryIndex = cmd_data.startIndex; entryIndex < EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE; entryIndex++) {
@@ -2006,7 +2006,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
                                                                          0x00, //entryCount
                                                                          NULL,
                                                                          0);
-      emberAfSendResponse();
+      emAfGreenPowerSendResponse();
       goto kickout;
     }
     uint16_t entriesCount = 0;
@@ -2059,12 +2059,12 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
                                                                          0x00, //entryCount
                                                                          NULL,
                                                                          0);
-      emberAfSendResponse();
+      emAfGreenPowerSendResponse();
       goto kickout;
     } else {
       //Insert the number of entries actually included @ entryCountOffset
       appResponseData[entryCountOffset] = entriesCount;
-      EmberStatus status = emberAfSendResponse();
+      EmberStatus status = emAfGreenPowerSendResponse();
       if (status == EMBER_MESSAGE_TOO_LONG) {
         emberAfFillCommandGreenPowerClusterGpTranslationTableResponseSmart(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE,
                                                                            0x00, //options
@@ -2073,7 +2073,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
                                                                            0x00, //entryCount
                                                                            NULL,
                                                                            0);
-        emberAfSendResponse();
+        emAfGreenPowerSendResponse();
       }
     }
   }           //end of else
@@ -2161,7 +2161,7 @@ bool emberAfGreenPowerClusterGpTranslationTableUpdateCallback(uint16_t options,
           emberAfGreenPowerClusterPrintln("Entry @Index [%d] is not empty", index);
         } else if ( retval == GP_TRANSLATION_TABLE_STATUS_PARAM_DOES_NOT_MATCH) {
           emberAfGreenPowerClusterPrintln("Parameter does not match @Index [%d]", index);
-          emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE); //send failure notification immediately
+          emAfGreenPowerSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE); //send failure notification immediately
         }
       }
     } else if (action == 0x01) {
@@ -2183,7 +2183,7 @@ bool emberAfGreenPowerClusterGpTranslationTableUpdateCallback(uint16_t options,
           emberAfGreenPowerClusterPrintln("Entry @Index [%d] is empty", index);
         } else if (retval == GP_TRANSLATION_TABLE_STATUS_PARAM_DOES_NOT_MATCH) {
           emberAfGreenPowerClusterPrintln("Parameter does not match @Index [%d]", index);
-          emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
+          emAfGreenPowerSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
         }
       }
     } else if (action == 0x02) {
@@ -2205,7 +2205,7 @@ bool emberAfGreenPowerClusterGpTranslationTableUpdateCallback(uint16_t options,
           emberAfGreenPowerClusterPrintln("Entry @Index [%d] is empty", index);
         } else if (retval == GP_TRANSLATION_TABLE_STATUS_PARAM_DOES_NOT_MATCH) {
           emberAfGreenPowerClusterPrintln("Parameter does not match @Index [%d]", index);
-          emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
+          emAfGreenPowerSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
         }
       }
     } else {
@@ -2254,7 +2254,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(uint8_t startInde
                                                                        0x00, //entryCount
                                                                        NULL,
                                                                        0);
-    emberAfSendResponse();
+    emAfGreenPowerSendResponse();
     goto kickout;
   } else {
     for (entryIndex = startIndex; entryIndex < EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE; entryIndex++) {
@@ -2272,7 +2272,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(uint8_t startInde
                                                                          0x00, //entryCount
                                                                          NULL,
                                                                          0);
-      emberAfSendResponse();
+      emAfGreenPowerSendResponse();
       goto kickout;
     }
     uint16_t entriesCount = 0;
@@ -2325,12 +2325,12 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(uint8_t startInde
                                                                          0x00, //entryCount
                                                                          NULL,
                                                                          0);
-      emberAfSendResponse();
+      emAfGreenPowerSendResponse();
       goto kickout;
     } else {
       //Insert the number of entries actually included @ entryCountOffset
       appResponseData[entryCountOffset] = entriesCount;
-      EmberStatus status = emberAfSendResponse();
+      EmberStatus status = emAfGreenPowerSendResponse();
       if (status == EMBER_MESSAGE_TOO_LONG) {
         emberAfFillCommandGreenPowerClusterGpTranslationTableResponseSmart(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE,
                                                                            0x00, //options
@@ -2339,7 +2339,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(uint8_t startInde
                                                                            0x00, //entryCount
                                                                            NULL,
                                                                            0);
-        emberAfSendResponse();
+        emAfGreenPowerSendResponse();
       }
     }
   }           //end of else

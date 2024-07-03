@@ -954,6 +954,19 @@ EmberStatus emberSetTokenData(uint32_t token,
                               uint32_t index,
                               EmberTokenData *tokenData);
 
+/**
+ * @brief Update function to accept a rejoin channel mask for Multi-MAC end device types.
+ * The following function is called for a Multi-MAC end device to allow the user configuration of
+ * the device to update channel mask for the scenario where a rejoin is initiated due to end device
+ * timeout event. Based on the Multi-MAC end device configuration this call is expected to update
+ * the mask so that the rejoin interface will be selected. As per the SE 1.4 errata, the
+ * "Multi-MAC Selection" end device can change the rejoin interface where as the Multi-MAC Joining
+ * end devices shall not.
+ * @param rejoinChannelMask 32-bit channel mask.
+ *
+ */
+void emberUpdateMultiMacRejoinChannelMaskForSelectionOrJoiningDevice(uint32_t *rejoinChannelMask);
+
 /** @} END addtogroup */
 
 #endif // SILABS_STACK_INFO_H

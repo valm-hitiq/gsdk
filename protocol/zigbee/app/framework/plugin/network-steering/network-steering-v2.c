@@ -322,7 +322,7 @@ void emAfPluginNetworkSteeringStackStatusCallback(EmberStatus status)
 void emberAfPluginNetworkSteeringStackStatusCallback(EmberStatus status)
 #endif
 {
-  emberAfCorePrintln("%p stack status 0x%X", PLUGIN_NAME, status);
+  emberAfCorePrintln("%s stack status 0x%X", PLUGIN_NAME, status);
 
   if (emAfPluginNetworkSteeringState
       == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE) {
@@ -682,7 +682,7 @@ EmberStatus emberAfPluginNetworkSteeringStart(void)
     }
   }
 
-  emberAfCorePrintln("%p: %p: 0x%X",
+  emberAfCorePrintln("%s: %s: 0x%X",
                      emAfNetworkSteeringPluginName,
                      "Start",
                      status);

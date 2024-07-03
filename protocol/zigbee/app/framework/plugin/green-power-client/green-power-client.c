@@ -467,9 +467,10 @@ bool emberAfGreenPowerClusterGpPairingCallback(EmberAfClusterCommand *cmd)
     //  If RemoveGPD options bit is set the comms mode is not valid so ignore this test
     if (broadcast == true) {
       // Silently drop it as its a broadcast
+      emGpSilentDrop = true;
     } else {
       //send default response for unicast pairing
-      emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_FIELD);
+      emAfGreenPowerSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_FIELD);
     }
   } else {
     // Step b:
@@ -499,7 +500,7 @@ bool emberAfGreenPowerClusterGpPairingCallback(EmberAfClusterCommand *cmd)
         emberAfGreenPowerClusterPrintln("ERR PROXY TABLE FULL");
         if (broadcast != true) {
           // CCB # 2279 - only send default response if not broadcast - broadcasts are dropped
-          emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE);
+          emAfGreenPowerSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE);
         }
       }
     }
@@ -518,7 +519,7 @@ bool emberAfGreenPowerClusterGpPairingCallback(EmberAfClusterCommand *cmd)
           }
         }
         emberAfGreenPowerClusterPrintln("ERR PROXY TABLE FULL");
-        emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE);
+        emAfGreenPowerSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE);
       }
     }
 #endif
@@ -665,7 +666,7 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
   }
 
   if (EMBER_GP_PROXY_TABLE_SIZE == 0) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_UNSUP_COMMAND);
+    emAfGreenPowerSendImmediateDefaultResponse(EMBER_ZCL_STATUS_UNSUP_COMMAND);
     goto kickout;
   }
 
@@ -696,7 +697,7 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
                                                                    validEntriesCount,
                                                                    0xff,
                                                                    0);
-      emberAfSendResponse();
+      emAfGreenPowerSendResponse();
       goto kickout;
     }
     entryIndex = emberGpProxyTableLookup(&addr);
@@ -705,7 +706,7 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
                                                                    validEntriesCount,
                                                                    0xff,
                                                                    0);
-      emberAfSendResponse();
+      emAfGreenPowerSendResponse();
       goto kickout;
     } else {
       emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
@@ -719,7 +720,7 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
       appResponseLength
         += emberAfGreenPowerClientStoreProxyTableEntry(&entry,
                                                        appResponseData + appResponseLength);
-      emberAfSendResponse();
+      emAfGreenPowerSendResponse();
       goto kickout;
     }
   } else if (requestType == EMBER_ZCL_GP_PROXY_TABLE_REQUEST_OPTIONS_REQUEST_TYPE_BY_INDEX) {
@@ -729,7 +730,7 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
                                                                    validEntriesCount,
                                                                    cmd_data.index,
                                                                    0);
-      emberAfSendResponse();
+      emAfGreenPowerSendResponse();
       goto kickout;
     } else {
       emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
@@ -768,14 +769,14 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
       //Insert the number of entries actually included
       appResponseData[GP_PROXY_TABLE_RESPONSE_ENTRIES_OFFSET + GP_NON_MANUFACTURER_ZCL_HEADER_LENGTH] = entriesCount;
 
-      EmberStatus status = emberAfSendResponse();
+      EmberStatus status = emAfGreenPowerSendResponse();
 
       if (status == EMBER_MESSAGE_TOO_LONG) {
         emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
                                                                      validEntriesCount,
                                                                      cmd_data.index,
                                                                      0);
-        emberAfSendResponse();
+        emAfGreenPowerSendResponse();
       }
       goto kickout;
     }
@@ -891,9 +892,10 @@ bool emberAfGreenPowerClusterGpPairingCallback(uint32_t options, // actually a i
     //  If RemoveGPD options bit is set the comms mode is not valid so ignore this test
     if (broadcast == true) {
       // Silently drop it as its a broadcast
+      emGpSilentDrop = true;
     } else {
       //send default response for unicast pairing
-      emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_FIELD);
+      emAfGreenPowerSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_FIELD);
     }
   } else {
     // Step b:
@@ -923,7 +925,7 @@ bool emberAfGreenPowerClusterGpPairingCallback(uint32_t options, // actually a i
         emberAfGreenPowerClusterPrintln("ERR PROXY TABLE FULL");
         if (broadcast != true) {
           // CCB # 2279 - only send default response if not broadcast - broadcasts are dropped
-          emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE);
+          emAfGreenPowerSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE);
         }
       }
     }
@@ -942,7 +944,7 @@ bool emberAfGreenPowerClusterGpPairingCallback(uint32_t options, // actually a i
           }
         }
         emberAfGreenPowerClusterPrintln("ERR PROXY TABLE FULL");
-        emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE);
+        emAfGreenPowerSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE);
       }
     }
 #endif
@@ -1125,7 +1127,7 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(uint8_t options,
   }
 
   if (EMBER_GP_PROXY_TABLE_SIZE == 0) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_UNSUP_COMMAND);
+    emAfGreenPowerSendImmediateDefaultResponse(EMBER_ZCL_STATUS_UNSUP_COMMAND);
     goto kickout;
   }
 
@@ -1159,7 +1161,7 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(uint8_t options,
                                                                    validEntriesCount,
                                                                    index,
                                                                    0);
-      emberAfSendResponse();
+      emAfGreenPowerSendResponse();
       goto kickout;
     } else {
       emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
@@ -1173,7 +1175,7 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(uint8_t options,
       appResponseLength
         += emberAfGreenPowerClientStoreProxyTableEntry(&entry,
                                                        appResponseData + appResponseLength);
-      emberAfSendResponse();
+      emAfGreenPowerSendResponse();
       goto kickout;
     }
   } else if (requestType == EMBER_ZCL_GP_PROXY_TABLE_REQUEST_OPTIONS_REQUEST_TYPE_BY_INDEX) {
@@ -1183,7 +1185,7 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(uint8_t options,
                                                                    validEntriesCount,
                                                                    index,
                                                                    0);
-      emberAfSendResponse();
+      emAfGreenPowerSendResponse();
       goto kickout;
     } else {
       emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
@@ -1222,14 +1224,14 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(uint8_t options,
       //Insert the number of entries actually included
       appResponseData[GP_PROXY_TABLE_RESPONSE_ENTRIES_OFFSET + GP_NON_MANUFACTURER_ZCL_HEADER_LENGTH] = entriesCount;
 
-      EmberStatus status = emberAfSendResponse();
+      EmberStatus status = emAfGreenPowerSendResponse();
 
       if (status == EMBER_MESSAGE_TOO_LONG) {
         emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
                                                                      validEntriesCount,
                                                                      index,
                                                                      0);
-        emberAfSendResponse();
+        emAfGreenPowerSendResponse();
       }
       goto kickout;
     }
@@ -1389,7 +1391,14 @@ bool emberAfGreenPowerClusterAutoCommissioningCallback(GP_PARAMS)
 
 uint8_t qualityBasedDelay(uint8_t gpdLink)
 {
-  uint8_t ourLqi = (gpdLink & 0xC0) >> 5;
+  // The top 2 bits of gpdlink is operated with the mask 0xC0 (b11000000), hence needs to be shifted by 6.
+  uint8_t ourLqi = (gpdLink & 0xC0) >> 6;
+  // A.3.6.3.1 : QualityBasedDelay is calculated as follows:
+  //  For Link quality = 0b11: 0 ms;
+  //  For Link quality = 0b10: 32ms;
+  //  For Link quality = 0b01: 64ms;
+  //  For Link quality = 0b00: 96ms;
+  // So, the return from this function is a delay expressed as b0XX00000 ms, where bXX is (3 - ourLqi) in binary
   return ((3 - ourLqi) << 5);
 }
 
@@ -2179,6 +2188,8 @@ uint32_t emberAfGreenPowerClusterClientCommandParse(sl_service_opcode_t opcode,
 
   EmberAfClusterCommand *cmd = (EmberAfClusterCommand *)context->data;
   bool wasHandled = false;
+  emGpSilentDrop = false;
+  emGpCommandOrDefaultResponseSubmitted = false;
 
   if (!cmd->mfgSpecific) {
     switch (cmd->commandId) {
@@ -2203,6 +2214,13 @@ uint32_t emberAfGreenPowerClusterClientCommandParse(sl_service_opcode_t opcode,
         break;
       }
     }
+  }
+
+  if (wasHandled && !emGpSilentDrop && !emGpCommandOrDefaultResponseSubmitted) {
+    // Send a default response message if there is no default response for success
+    // or no command response is generated by the command handlers
+    // and message is not silently dropped.
+    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   }
 
   return ((wasHandled)

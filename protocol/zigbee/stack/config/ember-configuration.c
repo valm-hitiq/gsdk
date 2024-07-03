@@ -28,6 +28,7 @@
 #include "stack/include/ember-static-struct.h" // Required typedefs
 #include "stack/include/message.h" // Required for packetHandlers
 #include "mac-child.h" // unified-mac
+#include "scan.h" // Required for PG_CH_BITMASK32
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -981,3 +982,17 @@ EmberMacFilterMatchData emCustomMacFilterMatchListData[EMBER_CUSTOM_MAC_FILTER_T
 #include "stack/framework/zigbee-event-logger-stub-gen.c"
 #endif // !EMBER_AF_PLUGIN_ZIGBEE_EVENT_LOGGER
 #endif // UC_BUILD
+
+// The following function is called for a Multi-MAC end device to allow the user configuration of
+// the device to update channel mask for the scenario where a rejoin is initated due to end device
+// timeout event. Based on the Multi-MAC end device configuration this call is expected to update
+// the mask so that the rejoin interface will be selected. As per the SE 1.4 errata, the
+// "Multi-MAC Selection" end device can change the rejoin interface (this is default) where as the
+// Multi-MAC Joining end devices shall not, hence supply the channel mask based on the joined interface.
+extern uint8_t emberGetLogicalChannel(void);
+WEAK(void emberUpdateMultiMacRejoinChannelMaskForSelectionOrJoiningDevice(uint32_t *rejoinChannelMask))
+{
+#ifdef SL_CATALOG_ZIGBEE_PHY_2_4_SUBGHZ_JOINING_END_DEVICE_PRESENT
+  *rejoinChannelMask = PG_CH_BITMASK32(emberGetLogicalChannel());
+#endif
+}

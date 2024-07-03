@@ -24,12 +24,12 @@ _zw_protocol_cmd_handlers_lr       0x30    0x8036984
 .debug_frame                     0x6c24          0x0
 .debug_info                    0xc93764          0x0
 .debug_abbrev                   0x16627          0x0
-.debug_loc                      0x45c1d          0x0
+.debug_loc                      0x45c2f          0x0
 .debug_aranges                    0x100          0x0
 .debug_ranges                    0xb3c0          0x0
-.debug_line                     0x53a28          0x0
+.debug_line                     0x53a2d          0x0
 .debug_str                      0x8fb2e          0x0
-Total                          0xe5da25
+Total                          0xe5da3c
 
 The calculated FLASH and SRAM usage summary:
 ============================================

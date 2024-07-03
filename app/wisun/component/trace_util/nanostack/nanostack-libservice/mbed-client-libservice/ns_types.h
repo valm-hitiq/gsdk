@@ -294,6 +294,11 @@ typedef int_fast32_t int_fast24_t;
 #undef NS_ALLOW_INLINING
 #endif
 
+/* IAR inlining is problematic with libraries */
+#if defined __IAR_SYSTEMS_ICC__
+#undef NS_ALLOW_INLINING
+#endif
+
 /** \brief Mark a potentially-inlineable function.
  *
  * We follow C99 semantics, which requires precisely one external definition.

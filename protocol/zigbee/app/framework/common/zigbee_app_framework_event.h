@@ -30,6 +30,11 @@
 #include "zigbee_core_cli_config.h"
 #endif // SL_CATALOG_ZIGBEE_CORE_CLI_PRESENT
 
+#ifdef SL_CATALOG_KERNEL_PRESENT
+#include "cmsis_os2.h"
+#include "sl_cmsis_os2_common.h"
+#endif // SL_CATALOG_KERNEL_PRESENT
+
 /**
  * @defgroup zigbee_event Event System
  * @ingroup af
@@ -49,6 +54,18 @@
  * @code
  * // Declare event as global
  * sl_zigbee_event_t my_event;
+ * sl_zigbee_event_t my_isr_event;
+ *
+ * void SOME_IRQHandler(void)
+ * {
+ *    // Activates the ISR type event from IRQ Handler.
+ *    sl_zigbee_event_set_active(&my_isr_event);
+ * }
+ *
+ * void my_isr_event_handler(sl_zigbee_event_t *event)
+ * {
+ *    // Event expired, do something
+ * }
  *
  * void my_event_hendler(sl_zigbee_event_t *event)
  * {
@@ -63,6 +80,9 @@
  *    // Initialize event
  *    sl_zigbee_event_init(&my_event, my_event_handler);
  *
+ *    // Initialise an event type that can be activated from the ISR.
+ *    sl_zigbee_af_isr_event_init(&my_isr_event, my_isr_event_handler);
+ *
  *    // Set the event to expire immediately (that is, in the next iteration of the main loop)
  *    sl_zigbee_event_set_active(&my_event);
  * }
@@ -76,8 +96,25 @@
  */
 typedef EmberEvent sl_zigbee_event_t;
 
+void sli_zigbee_af_event_set_delay_ms(sl_zigbee_event_t *event, uint8_t endpoint, uint32_t delay);
+void sli_zigbee_af_event_set_active(sl_zigbee_event_t *event, uint8_t endpoint);
+void sli_zigbee_af_event_set_inactive(sl_zigbee_event_t *event, uint8_t endpoint);
+uint32_t sli_zigbee_af_event_get_remaining_ms(sl_zigbee_event_t *event, uint8_t endpoint);
+bool sli_zigbee_af_event_is_scheduled(sl_zigbee_event_t *event, uint8_t endpoint);
+
 /** @name API */
 // @{
+
+/** @brief Application event initialization routine for ISR event. Every ISR event
+ * event must be initialized by calling this function.
+ *
+ * @param[in] event  A pointer to the \ref sl_zigbee_event_t object to be
+ *                   initalized. Event objects must be global.
+ *
+ * @param[in] handler Handler function that shall be called when the event runs.
+ */
+void sl_zigbee_af_isr_event_init(sl_zigbee_event_t *event,
+                                 void (*handler)(sl_zigbee_event_t *));
 
 #if defined(DOXYGEN_SHOULD_SKIP_THIS)
 /** @brief Application event initialization routine. Every application event
@@ -92,14 +129,11 @@ void sl_zigbee_event_init(sl_zigbee_event_t *event,
                           void (*handler)(sl_zigbee_event_t *));
 #else
 #if (SL_ZIGBEE_EVENT_DEBUG_ENABLED)
-  #define sl_zigbee_event_init(event, handler)                     \
-  do {                                                             \
-    sli_zigbee_event_init((event), (void *)(handler), 0xFF, 0xFF); \
-    ((event)->actions).name = (#event);                            \
-  } while (0)
+  #define sl_zigbee_event_init(event, handler) \
+  sli_zigbee_event_init((event), (#event), (void *)(handler), 0xFF, 0xFF)
 #else
   #define sl_zigbee_event_init(event, handler) \
-  sli_zigbee_event_init((event), (void *)(handler), 0xFF, 0xFF);
+  sli_zigbee_event_init((event), NULL, (void *)(handler), 0xFF, 0xFF)
 #endif // SL_ZIGBEE_EVENT_DEBUG_ENABLED
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
@@ -114,7 +148,7 @@ void sl_zigbee_event_init(sl_zigbee_event_t *event,
 void sl_zigbee_event_set_delay_ms(sl_zigbee_event_t *event, uint32_t delay);
 #else
 #define sl_zigbee_event_set_delay_ms(event, delay) \
-  emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), 0xFF), (delay))
+  sli_zigbee_af_event_set_delay_ms((event), (0xFF), (delay))
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #if defined(DOXYGEN_SHOULD_SKIP_THIS)
@@ -126,7 +160,7 @@ void sl_zigbee_event_set_delay_ms(sl_zigbee_event_t *event, uint32_t delay);
 void sl_zigbee_event_set_active(sl_zigbee_event_t *event);
 #else
 #define sl_zigbee_event_set_active(event) \
-  emberEventSetActive(sli_zigbee_get_event_ptr((event), 0xFF))
+  sli_zigbee_af_event_set_active((event), 0xFF)
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #if defined(DOXYGEN_SHOULD_SKIP_THIS)
@@ -138,7 +172,7 @@ void sl_zigbee_event_set_active(sl_zigbee_event_t *event);
 void sl_zigbee_event_set_inactive(sl_zigbee_event_t *event);
 #else
 #define sl_zigbee_event_set_inactive(event) \
-  emberEventSetInactive(sli_zigbee_get_event_ptr((event), 0xFF))
+  sli_zigbee_af_event_set_inactive((event), 0xFF)
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #if defined(DOXYGEN_SHOULD_SKIP_THIS)
@@ -151,7 +185,7 @@ void sl_zigbee_event_set_inactive(sl_zigbee_event_t *event);
 bool sl_zigbee_event_is_scheduled(sl_zigbee_event_t *event);
 #else
 #define sl_zigbee_event_is_scheduled(event) \
-  emberEventIsScheduled(sli_zigbee_get_event_ptr((event), 0xFF))
+  sli_zigbee_af_event_is_scheduled((event), 0xFF)
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #if defined(DOXYGEN_SHOULD_SKIP_THIS)
@@ -166,7 +200,7 @@ bool sl_zigbee_event_is_scheduled(sl_zigbee_event_t *event);
 uint32_t sl_zigbee_event_get_remaining_ms(sl_zigbee_event_t *event);
 #else
 #define sl_zigbee_event_get_remaining_ms(event) \
-  emberEventGetRemainingMs(sli_zigbee_get_event_ptr((event), 0xFF))
+  sli_zigbee_af_event_get_remaining_ms((event), 0xFF)
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 /** @} */ // end of name API
@@ -255,77 +289,67 @@ uint32_t sl_zigbee_event_get_remaining_ms(sl_zigbee_event_t *event);
   } while (0)
 
 void sli_zigbee_event_init(sl_zigbee_event_t *event,
+                           const char* event_name,
                            void *handler,
                            uint8_t network_index,
                            uint8_t endpoint);
 
 sl_zigbee_event_t* sli_zigbee_get_event_ptr(sl_zigbee_event_t *event,
                                             uint8_t endpoint);
-
-extern EmberEventQueue emAppEventQueue;
-#define sli_zigbee_ms_to_next_app_framework_event() \
-  emberMsToNextQueueEvent(&emAppEventQueue)
-
-#define sli_zigbee_run_events() \
-  emberRunEventQueue(&emAppEventQueue)
-
-#if (SL_ZIGBEE_EVENT_DEBUG_ENABLED)
-  #define sl_zigbee_endpoint_event_init(event, handler, endpoint)        \
-  do {                                                                   \
-    sli_zigbee_event_init((event), (void *)(handler), 0xFF, (endpoint)); \
-    ((event)->actions).name = (#event);                                  \
-  } while (0)
-#else
-  #define sl_zigbee_endpoint_event_init(event, handler, endpoint) \
-  sli_zigbee_event_init((event), (void *)(handler), 0xFF, (endpoint));
-#endif // SL_ZIGBEE_EVENT_DEBUG_ENABLED
-
 void sli_zigbee_network_event_init(sl_zigbee_event_t *event,
+                                   const char* event_name,
                                    void (*handler)(sl_zigbee_event_t *));
 
-#if (SL_ZIGBEE_EVENT_DEBUG_ENABLED)
-  #define sl_zigbee_network_event_init(event, handler) \
-  do {                                                 \
-    sli_zigbee_network_event_init((event), (handler)); \
-    ((event)->actions).name = (#event);                \
-  } while (0)
-#else
-  #define sl_zigbee_network_event_init(event, handler) \
-  sli_zigbee_network_event_init((event), (handler));
-#endif // SL_ZIGBEE_EVENT_DEBUG_ENABLED
-
+extern EmberEventQueue emAppEventQueue;
 #define sl_zigbee_event_set_delay_qs(event, delay) \
-  emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), 0xFF), ((delay) * 250u))
+  sli_zigbee_af_event_set_delay_ms((event), (0xFF), ((delay) * 250u))
 
 // For conversion from minutes to ms, multiply by 60,000 instead of << 16
 // This leads to a 10% difference between the time requested vs the actual time
 // leading to a large discrepancy for longer delays
 #define sl_zigbee_event_set_delay_minutes(event, delay) \
-  emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), 0xFF), ((delay) * 60000u))
+  sli_zigbee_af_event_set_delay_ms((event), (0xFF), ((delay) * 60000u))
 
 #define sl_zigbee_endpoint_event_set_delay_ms(event, endpoint, delay) \
-  emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), (endpoint)), (delay))
+  sli_zigbee_af_event_set_delay_ms((event), (endpoint), (delay))
 
 #define sl_zigbee_endpoint_event_set_delay_qs(event, endpoint, delay) \
-  emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), (endpoint)), ((delay) * 250u))
+  sli_zigbee_af_event_set_delay_ms((event), (endpoint), ((delay) * 250u))
 
 // For conversion from minutes to ms, multiply by 60,000 instead of << 16
 // This leads to a 10% difference between the time requested vs the actual time
 // leading to a large discrepancy for longer delays
 #define sl_zigbee_endpoint_event_set_delay_minutes(event, endpoint, delay) \
-  emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), (endpoint)), ((delay) * 60000u))
-
-#define sl_zigbee_endpoint_event_set_active(event, endpoint) \
-  emberEventSetActive(sli_zigbee_get_event_ptr((event), (endpoint)))
-
-#define sl_zigbee_endpoint_event_set_inactive(event, endpoint) \
-  emberEventSetInactive(sli_zigbee_get_event_ptr((event), (endpoint)))
-
-#define sl_zigbee_endpoint_event_is_scheduled(event, endpoint) \
-  emberEventIsScheduled(sli_zigbee_get_event_ptr((event), (endpoint)))
+  sli_zigbee_af_event_set_delay_ms((event), (endpoint), ((delay) * 60000u))
 
 #define sl_zigbee_endpoint_event_get_remaining_ms(event, endpoint) \
-  emberEventGetRemainingMs(sli_zigbee_get_event_ptr((event), (endpoint)))
+  sli_zigbee_af_event_get_remaining_ms((event), (endpoint))
+
+#define sl_zigbee_endpoint_event_is_scheduled(event, endpoint) \
+  sli_zigbee_af_event_is_scheduled((event), (endpoint))
+
+#define sl_zigbee_endpoint_event_set_active(event, endpoint) \
+  sli_zigbee_af_event_set_active((event), (endpoint))
+
+#define sl_zigbee_endpoint_event_set_inactive(event, endpoint) \
+  sli_zigbee_af_event_set_inactive((event), (endpoint))
+
+uint32_t sli_zigbee_af_ms_to_next_event();
+void sli_zigbee_af_run_events();
+
+#if (SL_ZIGBEE_EVENT_DEBUG_ENABLED)
+  #define sl_zigbee_endpoint_event_init(event, handler, endpoint) \
+  sli_zigbee_event_init((event), (#event), (void *)(handler), 0xFF, (endpoint))
+
+  #define sl_zigbee_network_event_init(event, handler) \
+  sli_zigbee_network_event_init((event), (#event), (handler))
+#else
+  #define sl_zigbee_endpoint_event_init(event, handler, endpoint) \
+  sli_zigbee_event_init((event), NULL, (void *)(handler), 0xFF, (endpoint))
+
+  #define sl_zigbee_network_event_init(event, handler) \
+  sli_zigbee_network_event_init((event), NULL, (handler))
+#endif // SL_ZIGBEE_EVENT_DEBUG_ENABLED
 
 #endif // !DOXYGEN_SHOULD_SKIP_THIS
 

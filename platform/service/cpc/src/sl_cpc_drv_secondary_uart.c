@@ -1441,6 +1441,9 @@ static bool rx_dma_complete_hwfc(unsigned int channel,
     EFM_ASSERT(out_of_sync == false);
     active_dma_rx_entry = (sli_buf_entry_t *)SLI_CPC_POP_BUFFER_HANDLE_LIST(&rx_free_list_head, sli_buf_entry_t);
     if (active_dma_rx_entry == NULL) {
+      // We couldn't attach the current RX buffer to a buffer entry. Free it now,
+      // or lose it forever!
+      sli_cpc_free_raw_rx_buffer(active_rx_buffer);
       rx_need_rx_entry = true;
       DMADRV_StopTransfer(read_channel);
       MCU_EXIT_ATOMIC();
@@ -1530,7 +1533,6 @@ static bool rx_dma_complete_hwfc(unsigned int channel,
               MCU_EXIT_ATOMIC();
               return false;
             }
-            out_of_sync_extra_bytes = 0;
           } else {
             next_rx_size = SLI_CPC_HDLC_HEADER_RAW_SIZE;
             resize_current_dma_descriptor(NULL, 0, SLI_CPC_HDLC_HEADER_RAW_SIZE);

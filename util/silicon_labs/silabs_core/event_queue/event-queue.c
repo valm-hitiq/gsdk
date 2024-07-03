@@ -32,6 +32,12 @@
 #include "hal/hal.h"
 #include "event-queue.h"
 
+#if (defined EZSP_HOST || defined EMBER_TEST)
+#define IN_INTERRUPT_CONTEXT() 0
+#else
+#define IN_INTERRUPT_CONTEXT() (CORE_IN_IRQ_CONTEXT())
+#endif
+
 // We use this instead of NULL at the end of a list so that unscheduled
 // events can be marked by having a 'next' field of NULL.  This makes them
 // easier to initialize.
@@ -281,6 +287,10 @@ void emberEventSetDelayMs(EmberEvent *event, uint32_t delay)
   } else {
     uint32_t now = halCommonGetInt32uMillisecondTick();
     uint32_t timeToExecute;
+
+    // Check that non-ISR-marked function isn't being scheduled in ISR context since
+    // that's not permitted and can lead to event queue corruption
+    assert(!(IN_INTERRUPT_CONTEXT()));
 
     if (delay < EMBER_MAX_EVENT_DELAY_MS) {
       timeToExecute = now + delay;

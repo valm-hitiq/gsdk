@@ -45,7 +45,15 @@ void sl_zigbee_app_framework_force_stop(void)
   emMacPurgeIncomingQueue();
 
   emberCancelAllEvents(&emStackEventQueue);
+#ifdef SL_CATALOG_KERNEL_PRESENT
+  osStatus_t ret = osMutexAcquire(app_event_mutex_id, osWaitForever);
+  assert(ret == osOK);
+#endif // SL_CATALOG_KERNEL_PRESENT
   emberCancelAllEvents(&emAppEventQueue);
+#ifdef SL_CATALOG_KERNEL_PRESENT
+  ret = osMutexRelease(app_event_mutex_id);
+  assert(ret == osOK);
+#endif // SL_CATALOG_KERNEL_PRESENT
 
   sli_mac_lower_mac_force_sleep(true);
   force_sleep = true;

@@ -1,2 +1,2 @@
-32-Bit MCU SDK 6.4.5.0
-- Underlying platforms c
+Gecko Platform 4.2.6.0
+- Targeted quality improvements and bug fixes

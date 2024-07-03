@@ -1,4 +1,4 @@
-Bluetooth Mesh SDK 4.2.3.0
+Bluetooth Mesh SDK 4.2.4.0
 -Targeted quality improvements and bugfixes
 
 
